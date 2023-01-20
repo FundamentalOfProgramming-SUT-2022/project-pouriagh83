@@ -482,6 +482,49 @@ if(backOrForward == 'b')
 }
 }
 
+void pasteStr(char *fileName)
+{
+    int lineNumber, charNumber;
+    scanf("%d", &lineNumber);
+    getchar();
+    scanf("%d", &charNumber);
+    FILE *openForWrite = fopen(fileName, "r");
+    FILE *tmpFile = fopen("tmp.txt", "w");
+    int whichLine = 1, whichChar = 0;
+    char temp;
+   while(whichLine != lineNumber)
+    {
+        temp = getc(openForWrite);
+        if(temp != EOF)
+            putc(temp, tmpFile);
+        else
+           putc('\n', tmpFile);
+        if(temp == '\n' || temp == EOF)
+           whichLine++;
+    }
+    while(whichChar != charNumber)
+    {
+        temp = getc(openForWrite);
+        if(temp == EOF)
+           putc(' ', tmpFile);
+        else
+           putc(temp, tmpFile);
+        whichChar++;
+    }
+    fputs(clipBoard, tmpFile);
+    while(temp != EOF)
+    {
+        temp = getc(openForWrite);
+        if(temp != EOF)
+        putc(temp, tmpFile);
+    }
+    fclose(openForWrite);
+    fclose(tmpFile);
+    remove(fileName);
+    rename("tmp.txt", fileName);
+    isCommanValid = 1;
+}
+
 void goToDir(char *checkCommand)
 {
 int weHaveSpace = 0;
@@ -553,6 +596,15 @@ while(index != -1)
          backToMainFolder();
          return;
         }
+        else if(strcmp(checkCommand, "paste") == 0)
+        {
+            char posCommnad[100];
+          scanf("%s", posCommnad);
+          if(strcmp(posCommnad, "--pos") == 0)
+             pasteStr(nameOfDir);
+          backToMainFolder();
+          return;
+        }
         }
         index = -1;
         break;
@@ -583,11 +635,11 @@ while(index != -1)
 int main()
 {
 char commands[1000];
+clipBoard = malloc(1000000000 * sizeof(char));
 while(1)
 {
 isCommanValid = 0;
 scanf("%s", commands);
-clipBoard = malloc(1000000000 * sizeof(char));
 
     if(strcmp(commands, "createfile") == 0)
     {
@@ -625,11 +677,16 @@ clipBoard = malloc(1000000000 * sizeof(char));
         if(strcmp(commands, "--file") == 0)
            goToDir("cut");
     }
+    else if(strcmp(commands, "pastestr") == 0)
+    {
+        scanf("%s", commands);
+        if(strcmp(commands, "--file") == 0)
+           goToDir("paste");
+    }
     if(isCommanValid == 0)
     {
         while(getchar() != '\n');
         printf("Invalid Command\n");
     }
-    
 }
 }
