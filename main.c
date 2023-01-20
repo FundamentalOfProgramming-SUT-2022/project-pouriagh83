@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 int isCommanValid;
+char *clipBoard;
 int numberOfDirectoryWeGoInto = 0;
 
 void backToMainFolder()
@@ -209,7 +210,7 @@ FILE *tempFile = fopen("tmp.txt", "w");
 int whichLineWeStand = 1, whichCharWeStand = 0;
     if(backOrForward == 'b')
     {
-    char saveChar[10000];
+    char *saveChar = malloc(100000000 * sizeof(char));
     int countCharInFile = 0;
     int index = 0;
     while(whichLineWeStand != lineNumber)
@@ -256,6 +257,211 @@ int whichLineWeStand = 1, whichCharWeStand = 0;
             whichCharWeStand++;
           }
           for(int i = 0; i < numberOfChar; i++)
+          {
+            character = getc(openToRead);
+          }
+          while(1)
+          {
+            character = getc(openToRead);
+            if(character == EOF)
+               break;
+            putc(character, tempFile);
+          }
+          isCommanValid = 1;
+          }
+          fclose(openToRead);
+          fclose(tempFile);
+          remove(nameOfFile);
+          rename("tmp.txt", nameOfFile);
+}
+}
+}
+
+void copyStr(char *nameOfFile)
+{
+char command[20];
+scanf("%s", command);
+if(strcmp(command, "--pos") == 0)
+{
+    int lineNumber, charNumber;
+    scanf("%d", &lineNumber);
+    getchar();
+    scanf("%d", &charNumber);
+    scanf("%s", command);
+    if(strcmp(command, "-size") == 0)
+    {
+        int numberOfCharacterToCopy;
+        scanf("%d", &numberOfCharacterToCopy);
+        getchar();getchar();
+        char backOrForward = getchar();
+        int whichLineWeStand = 1, whichCharWeStand = 0;
+        FILE *openToRead = fopen(nameOfFile, "r");
+        memset(clipBoard, 0, 1000000000);
+        if(backOrForward == 'f')
+        {
+            while(lineNumber != whichLineWeStand)
+            {
+             if(getc(openToRead) == '\n')
+                whichLineWeStand++;
+            }
+            while(charNumber != whichCharWeStand)
+            {
+                getc(openToRead);
+                whichCharWeStand++;
+            }
+            getc(openToRead);
+            for(int i = 0; i < numberOfCharacterToCopy; i++){
+                clipBoard[i] = getc(openToRead);
+            }
+            isCommanValid = 1;
+        }
+        else if(backOrForward == 'b')
+        {
+            int howManyCharWeSaved = 0;
+            while(lineNumber != whichLineWeStand)
+            {
+                clipBoard[howManyCharWeSaved] = getc(openToRead);
+                if(clipBoard[howManyCharWeSaved] == '\n')
+                   whichLineWeStand++;
+                howManyCharWeSaved++;
+            }
+            while(charNumber != whichCharWeStand)
+            {
+                clipBoard[howManyCharWeSaved] = getc(openToRead);
+                whichCharWeStand++;
+                howManyCharWeSaved++;
+            }
+            for(int i = 0; i < numberOfCharacterToCopy; i++)
+            {
+                clipBoard[i] = clipBoard[howManyCharWeSaved - numberOfCharacterToCopy + i];
+            }
+            for(int i = numberOfCharacterToCopy;i < howManyCharWeSaved ; i++)
+            {
+                clipBoard[i] = '\0';
+            }
+            isCommanValid = 1;
+        }
+        fclose(openToRead);
+    }
+}
+}
+
+void cutStr(char *nameOfFile)
+{
+char command[20];
+scanf("%s", command);
+if(strcmp(command, "--pos") == 0)
+{
+    int lineNumber, charNumber;
+    scanf("%d", &lineNumber);
+    getchar();
+    scanf("%d", &charNumber);
+    scanf("%s", command);
+    if(strcmp(command, "-size") == 0)
+    {
+        int numberOfCharacterToCopy;
+        scanf("%d", &numberOfCharacterToCopy);
+        getchar();getchar();
+        char backOrForward = getchar();
+        int whichLineWeStand = 1, whichCharWeStand = 0;
+        FILE *openToRead = fopen(nameOfFile, "r");
+        memset(clipBoard, 0, 1000000000);
+        if(backOrForward == 'f')
+        {
+            while(lineNumber != whichLineWeStand)
+            {
+             if(getc(openToRead) == '\n')
+                whichLineWeStand++;
+            }
+            while(charNumber != whichCharWeStand)
+            {
+                getc(openToRead);
+                whichCharWeStand++;
+            }
+            getc(openToRead);
+            for(int i = 0; i < numberOfCharacterToCopy; i++){
+                clipBoard[i] = getc(openToRead);
+            }
+        }
+        else if(backOrForward == 'b')
+        {
+            int howManyCharWeSaved = 0;
+            while(lineNumber != whichLineWeStand)
+            {
+                clipBoard[howManyCharWeSaved] = getc(openToRead);
+                if(clipBoard[howManyCharWeSaved] == '\n')
+                   whichLineWeStand++;
+                howManyCharWeSaved++;
+            }
+            while(charNumber != whichCharWeStand)
+            {
+                clipBoard[howManyCharWeSaved] = getc(openToRead);
+                whichCharWeStand++;
+                howManyCharWeSaved++;
+            }
+            for(int i = 0; i < numberOfCharacterToCopy; i++)
+            {
+                clipBoard[i] = clipBoard[howManyCharWeSaved - numberOfCharacterToCopy + i];
+            }
+            for(int i = numberOfCharacterToCopy;i < howManyCharWeSaved ; i++)
+            {
+                clipBoard[i] = '\0';
+            }
+        }
+        fseek(openToRead, 0, SEEK_SET);
+        whichCharWeStand = 0;
+        whichLineWeStand = 1;
+        FILE *tempFile = fopen("tmp.txt", "w");
+if(backOrForward == 'b')
+    {
+    char *saveChar = malloc(100000000 * sizeof(char));
+    int countCharInFile = 0;
+    int index = 0;
+    while(whichLineWeStand != lineNumber)
+    {
+        saveChar[index] = getc(openToRead);
+        countCharInFile++;
+        if(saveChar[index] == '\n')
+            whichLineWeStand++;
+        index++;
+    }
+    while(charNumber != whichCharWeStand)
+    {
+        saveChar[index] = getc(openToRead);
+        countCharInFile++;
+        whichCharWeStand++;
+        index++;
+    }
+    for(int i = 0;i < countCharInFile - numberOfCharacterToCopy;i++)
+    {
+        fputc(saveChar[i], tempFile);
+    }
+    char save;
+    while(save != EOF)
+    {
+        save = getc(openToRead);
+        if(save != EOF)
+            putc(save, tempFile);
+    }
+    isCommanValid = 1;
+    }
+    else if(backOrForward == 'f')
+    {
+        char character;
+    while(whichLineWeStand != lineNumber)
+          {
+          character = getc(openToRead);
+          putc(character, tempFile);
+          if(character == '\n')
+             whichLineWeStand++;
+          }
+          while(whichCharWeStand != charNumber + 1)
+          {
+            character = getc(openToRead);
+            putc(character, tempFile);
+            whichCharWeStand++;
+          }
+          for(int i = 0; i < numberOfCharacterToCopy; i++)
           {
             character = getc(openToRead);
           }
@@ -335,6 +541,18 @@ while(index != -1)
           backToMainFolder();
           return;
         }
+        else if(strcmp(checkCommand, "copy") == 0)
+        {
+        copyStr(nameOfDir);
+        backToMainFolder();
+        return;
+        }
+        else if(strcmp(checkCommand, "cut") == 0)
+        {
+         cutStr(nameOfDir);
+         backToMainFolder();
+         return;
+        }
         }
         index = -1;
         break;
@@ -369,7 +587,7 @@ while(1)
 {
 isCommanValid = 0;
 scanf("%s", commands);
-
+clipBoard = malloc(1000000000 * sizeof(char));
 
     if(strcmp(commands, "createfile") == 0)
     {
@@ -394,6 +612,18 @@ scanf("%s", commands);
         scanf("%s", commands);
         if(strcmp(commands, "--file") == 0)
            goToDir("removestr");
+    }
+    else if(strcmp(commands, "copystr") == 0)
+    {
+        scanf("%s", commands);
+        if(strcmp(commands, "--file") == 0)
+            goToDir("copy");
+    }
+    else if(strcmp(commands, "cutstr") == 0)
+    {
+        scanf("%s", commands);
+        if(strcmp(commands, "--file") == 0)
+           goToDir("cut");
     }
     if(isCommanValid == 0)
     {
