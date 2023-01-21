@@ -99,7 +99,7 @@ void setStringInSpecified(char *fileName)
         else if(inputedString[index] == '\\')
         {
             char trash;
-            if(trash = getchar() == 'n')
+            if((trash = getchar()) == 'n')
             {
                 index++;
                 inputedString[index] = 'n';
@@ -110,13 +110,6 @@ void setStringInSpecified(char *fileName)
                index++;
                inputedString[index] = trash;
             }
-        }
-        else
-        {
-           index++;
-           inputedString[index] = inputedString[index - 1];
-           inputedString[index - 1] = '\\';
-           
         }
     }
     else if(inputedString[index] == ' ' && weHaveSpace == 0)
