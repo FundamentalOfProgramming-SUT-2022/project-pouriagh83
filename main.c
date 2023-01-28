@@ -571,6 +571,81 @@ rename(namePervious, nameOfFile);
 isCommanValid = 1;
 }
 
+void autoIndent(char *nameOfFile)
+{
+    FILE *opentoRead = fopen("t.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
+    int numberOfBraces = 0, numberOfSpace = 0;
+    char prevent = '\0';
+    char a = getc(opentoRead);
+    while(a != EOF)
+    {
+    if(a == '{')
+    {
+        if(prevent == '\n')
+           for(int i = 0; i < 4 * numberOfBraces; i++){fputc(' ', temp);}
+        if(prevent != ' ' && prevent != SEEK_SET && prevent != '\n')
+           fputc(' ', temp);
+        if(prevent == '}')
+           fputc('\n', temp);
+        numberOfBraces++;
+        fputc(a, temp);
+        fputc('\n', temp);
+        prevent = '\n';
+    }
+    else if(a == '}')
+    {
+        numberOfBraces--;
+        fputc('\n', temp);
+        for(int i = 0; i < 4*numberOfBraces; i++){fputc(' ', temp);}
+        fputc(a, temp);
+        prevent = '}';
+    }
+    else if(a == ' ')
+    {
+     numberOfSpace++;
+     char b;
+     while((b = getc(opentoRead)) == ' '){numberOfSpace++;}
+     if(b == '{')
+     {
+        a = b;
+        numberOfSpace = 0;
+        continue;
+     }
+     else if(b == '}')
+     {
+        a = b;
+        continue;
+     }
+     else
+     {
+        for(int i = 0; i < numberOfSpace; i++){fputc(' ', temp);}
+        a = b;
+        prevent = ' ';
+        numberOfSpace = 0;
+        continue;
+     }
+     numberOfSpace = 0;
+    }
+    else
+    {
+        if(prevent == '\n')
+        {
+            for(int i = 0; i < 4 * numberOfBraces; i++){fputc(' ', temp);}
+        }
+        if(prevent == '}')
+           fputc('\n', temp);
+        fputc(a, temp);
+        prevent = a;
+    }
+    a = getc(opentoRead);
+    }
+    fclose(temp);
+    fclose(opentoRead);
+    remove(nameOfFile);
+    rename("temp.txt", nameOfFile);
+}
+
 void goToDir(char *checkCommand)
 {
 int weHaveSpace = 0;
@@ -586,7 +661,7 @@ while(index != -1)
     memset(nameOfDir, 0, 1000);
     while((nameOfDir[index] = getchar()) != '/')
     {
-        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo"))))
+        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto"))))
         {
         nameOfDir[index] = '\0';
         FILE *check = fopen(nameOfDir, "r");
@@ -663,6 +738,14 @@ while(index != -1)
         {
             undo(nameOfDir);
             backToMainFolder();
+            return;
+        }
+        else if(!strcmp(checkCommand, "auto"))
+        {
+            makePervious(nameOfDir);
+            autoIndent(nameOfDir);
+            backToMainFolder();
+            isCommanValid = 1;
             return;
         }
         }
@@ -747,6 +830,10 @@ scanf("%s", commands);
         scanf("%s", commands);
         if(!strcmp(commands, "--file"))
            goToDir("undo");
+    }
+    else if(!strcmp(commands, "auto-indent"))
+    {
+        goToDir("auto");
     }
     if(isCommanValid == 0)
     {
