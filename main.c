@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <windows.h>
 int isCommanValid;
-char *clipBoard;
 int numberOfDirectoryWeGoInto = 0;
 
 void backToMainFolder()
@@ -297,6 +296,8 @@ char command[20];
 scanf("%s", command);
 if(strcmp(command, "--pos") == 0)
 {
+    remove("U:/BasicProgramming/Project/Codes/clipboard.txt");
+    FILE *clipboard = fopen("U:/BasicProgramming/Project/Codes/clipboard.txt", "w");
     int lineNumber, charNumber;
     scanf("%d", &lineNumber);
     getchar();
@@ -310,7 +311,6 @@ if(strcmp(command, "--pos") == 0)
         char backOrForward = getchar();
         int whichLineWeStand = 1, whichCharWeStand = 0;
         FILE *openToRead = fopen(nameOfFile, "r");
-        memset(clipBoard, 0, 1000000000);
         if(backOrForward == 'f')
         {
             while(lineNumber != whichLineWeStand)
@@ -325,7 +325,8 @@ if(strcmp(command, "--pos") == 0)
             }
             getc(openToRead);
             for(int i = 0; i < numberOfCharacterToCopy; i++){
-                clipBoard[i] = getc(openToRead);
+                char a = getc(openToRead);
+                putc(a, clipboard);
             }
             isCommanValid = 1;
         }
@@ -334,34 +335,36 @@ if(strcmp(command, "--pos") == 0)
             int howManyCharWeSaved = 0;
             while(lineNumber != whichLineWeStand)
             {
-                clipBoard[howManyCharWeSaved] = getc(openToRead);
-                if(clipBoard[howManyCharWeSaved] == '\n')
+                char a = getc(openToRead);
+                fputc(a, clipboard);
+                if(a == '\n')
                    whichLineWeStand++;
                 howManyCharWeSaved++;
             }
             while(charNumber != whichCharWeStand)
             {
-                clipBoard[howManyCharWeSaved] = getc(openToRead);
+                char a = getc(openToRead);
+                fputc(a, clipboard);
                 whichCharWeStand++;
                 howManyCharWeSaved++;
             }
-            for(int i = 0; i < numberOfCharacterToCopy; i++)
+            fseek(clipboard, 0, SEEK_SET);
+            for(int i = 0; i < howManyCharWeSaved - numberOfCharacterToCopy; i++)
             {
-                clipBoard[i] = clipBoard[howManyCharWeSaved - numberOfCharacterToCopy + i];
-            }
-            for(int i = numberOfCharacterToCopy;i < howManyCharWeSaved ; i++)
-            {
-                clipBoard[i] = '\0';
+                fputc(EOF, clipboard);
             }
             isCommanValid = 1;
         }
+        fclose(clipboard);
         fclose(openToRead);
+        DWORD attributes = GetFileAttributes("U:/BasicProgramming/Project/Codes/clipboard.txt");
+        SetFileAttributes("U:/BasicProgramming/Project/Codes/clipboard.txt", attributes + FILE_ATTRIBUTE_HIDDEN);
     }
 }
 }
 
-void cutStr(char *nameOfFile)
-{
+ void cutStr(char *nameOfFile)
+ {
 char command[20];
 scanf("%s", command);
 if(strcmp(command, "--pos") == 0)
@@ -373,13 +376,14 @@ if(strcmp(command, "--pos") == 0)
     scanf("%s", command);
     if(strcmp(command, "-size") == 0)
     {
+        remove("U:/BasicProgramming/Project/Codes/clipboard.txt");
         int numberOfCharacterToCopy;
         scanf("%d", &numberOfCharacterToCopy);
         getchar();getchar();
         char backOrForward = getchar();
         int whichLineWeStand = 1, whichCharWeStand = 0;
         FILE *openToRead = fopen(nameOfFile, "r");
-        memset(clipBoard, 0, 1000000000);
+        FILE *clipboard = fopen("U:/BasicProgramming/Project/Codes/clipboard.txt", "w");
         if(backOrForward == 'f')
         {
             while(lineNumber != whichLineWeStand)
@@ -394,7 +398,8 @@ if(strcmp(command, "--pos") == 0)
             }
             getc(openToRead);
             for(int i = 0; i < numberOfCharacterToCopy; i++){
-                clipBoard[i] = getc(openToRead);
+                char a = getc(openToRead);
+                putc(a, clipboard);
             }
         }
         else if(backOrForward == 'b')
@@ -402,24 +407,23 @@ if(strcmp(command, "--pos") == 0)
             int howManyCharWeSaved = 0;
             while(lineNumber != whichLineWeStand)
             {
-                clipBoard[howManyCharWeSaved] = getc(openToRead);
-                if(clipBoard[howManyCharWeSaved] == '\n')
+                char a = getc(openToRead);
+                putc(a, clipboard);
+                if(a == '\n')
                    whichLineWeStand++;
                 howManyCharWeSaved++;
             }
             while(charNumber != whichCharWeStand)
             {
-                clipBoard[howManyCharWeSaved] = getc(openToRead);
+                char a = getc(openToRead);
+                putc(a, clipboard);
                 whichCharWeStand++;
                 howManyCharWeSaved++;
             }
-            for(int i = 0; i < numberOfCharacterToCopy; i++)
+            fseek(clipboard, 0, SEEK_SET);
+            for(int i = 0; i < howManyCharWeSaved - numberOfCharacterToCopy; i++)
             {
-                clipBoard[i] = clipBoard[howManyCharWeSaved - numberOfCharacterToCopy + i];
-            }
-            for(int i = numberOfCharacterToCopy;i < howManyCharWeSaved ; i++)
-            {
-                clipBoard[i] = '\0';
+                fputc(EOF, clipboard);
             }
         }
         fseek(openToRead, 0, SEEK_SET);
@@ -488,20 +492,24 @@ if(backOrForward == 'b')
           }
           isCommanValid = 1;
           }
+          fclose(clipboard);
           fclose(openToRead);
           fclose(tempFile);
           remove(nameOfFile);
           rename("tmp.txt", nameOfFile);
+          DWORD attributes = GetFileAttributes("U:/BasicProgramming/Project/Codes/clipboard.txt");
+          SetFileAttributes("U:/BasicProgramming/Project/Codes/clipboard.txt", attributes + FILE_ATTRIBUTE_HIDDEN);
 }
 }
 }
 
 void pasteStr(char *fileName)
-{
+ {
     int lineNumber, charNumber;
     scanf("%d", &lineNumber);
     getchar();
     scanf("%d", &charNumber);
+    FILE *clipboard = fopen("U:/BasicProgramming/Project/Codes/clipboard.txt", "r");
     FILE *openForWrite = fopen(fileName, "r");
     FILE *tmpFile = fopen("tmp.txt", "w");
     int whichLine = 1, whichChar = 0;
@@ -525,7 +533,18 @@ void pasteStr(char *fileName)
            putc(temp, tmpFile);
         whichChar++;
     }
-    fputs(clipBoard, tmpFile);
+    char a = getc(clipboard);
+    while(a == EOF)
+    {
+        a = getc(clipboard);
+    }
+    putc(a, tmpFile);
+    a = getc(clipboard);
+    while(a != EOF)
+    {
+        fputc(a, tmpFile);
+        a = getc(clipboard);
+    }
     while(temp != EOF)
     {
         temp = getc(openForWrite);
@@ -534,10 +553,11 @@ void pasteStr(char *fileName)
     }
     fclose(openForWrite);
     fclose(tmpFile);
+    fclose(clipboard);
     remove(fileName);
     rename("tmp.txt", fileName);
     isCommanValid = 1;
-}
+ }
 
 void undo(char *nameOfFile)
 {
@@ -675,7 +695,6 @@ while(index != -1)
 int main()
 {
 char commands[1000];
-clipBoard = malloc(1000000000 * sizeof(char));
 while(1)
 {
 isCommanValid = 0;
