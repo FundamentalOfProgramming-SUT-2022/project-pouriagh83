@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <windows.h>
 int isCommanValid;
 char *clipBoard;
 int numberOfDirectoryWeGoInto = 0;
@@ -15,6 +16,26 @@ for(int i = 0; i < numberOfDirectoryWeGoInto; i++)
 chdir("..");
 }
 numberOfDirectoryWeGoInto = 0;
+}
+
+void makePervious(char *nameOfFile)
+{
+    char name[50];
+    strcpy(name, "pervious");
+    strcat(name, nameOfFile);
+    remove(name);
+    FILE *perviousVersion = fopen(name, "w");
+    FILE *now = fopen(nameOfFile, "r");
+    char a = getc(now);
+    while(a != EOF)
+    {
+        fputc(a, perviousVersion);
+        a = getc(now);
+    }
+    fclose(now);
+    fclose(perviousVersion);
+    DWORD attributes = GetFileAttributes(name);
+    SetFileAttributes(name, attributes + FILE_ATTRIBUTE_HIDDEN);
 }
 
 void createFile(char *nameOfFile)
@@ -518,6 +539,18 @@ void pasteStr(char *fileName)
     isCommanValid = 1;
 }
 
+void undo(char *nameOfFile)
+{
+char namePervious[50];
+strcpy(namePervious, "pervious");
+strcat(namePervious, nameOfFile);
+remove(nameOfFile);
+DWORD attributes = GetFileAttributes(namePervious);
+SetFileAttributes(namePervious, attributes + FILE_ATTRIBUTE_HIDDEN);
+rename(namePervious, nameOfFile);
+isCommanValid = 1;
+}
+
 void goToDir(char *checkCommand)
 {
 int weHaveSpace = 0;
@@ -533,7 +566,7 @@ while(index != -1)
     memset(nameOfDir, 0, 1000);
     while((nameOfDir[index] = getchar()) != '/')
     {
-        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && !strcmp(checkCommand, "cat")))
+        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo"))))
         {
         nameOfDir[index] = '\0';
         FILE *check = fopen(nameOfDir, "r");
@@ -556,6 +589,7 @@ while(index != -1)
         if(strcmp(secondCommand, "--str") == 0)
         {
             getchar();
+            makePervious(nameOfDir);
             setStringInSpecified(nameOfDir);
             backToMainFolder();
             return;
@@ -573,7 +607,10 @@ while(index != -1)
           char posCommnad[100];
           scanf("%s", posCommnad);
           if(strcmp(posCommnad, "--pos") == 0)
+          {
+            makePervious(nameOfDir);
              removeStr(nameOfDir);
+          }
           backToMainFolder();
           return;
         }
@@ -585,6 +622,7 @@ while(index != -1)
         }
         else if(strcmp(checkCommand, "cut") == 0)
         {
+         makePervious(nameOfDir);
          cutStr(nameOfDir);
          backToMainFolder();
          return;
@@ -595,8 +633,15 @@ while(index != -1)
           scanf("%s", posCommnad);
           if(strcmp(posCommnad, "--pos") == 0)
              pasteStr(nameOfDir);
+          makePervious(nameOfDir);
           backToMainFolder();
           return;
+        }
+        else if(!strcmp(checkCommand, "undo"))
+        {
+            undo(nameOfDir);
+            backToMainFolder();
+            return;
         }
         }
         index = -1;
@@ -675,6 +720,12 @@ scanf("%s", commands);
         scanf("%s", commands);
         if(strcmp(commands, "--file") == 0)
            goToDir("paste");
+    }
+    else if(!strcmp(commands, "undo"))
+    {
+        scanf("%s", commands);
+        if(!strcmp(commands, "--file"))
+           goToDir("undo");
     }
     if(isCommanValid == 0)
     {
