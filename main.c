@@ -632,8 +632,10 @@ while(index != -1)
             char posCommnad[100];
           scanf("%s", posCommnad);
           if(strcmp(posCommnad, "--pos") == 0)
-             pasteStr(nameOfDir);
-          makePervious(nameOfDir);
+          {
+           makePervious(nameOfDir);
+           pasteStr(nameOfDir);
+          }
           backToMainFolder();
           return;
         }
