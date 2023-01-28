@@ -597,6 +597,7 @@ void autoIndent(char *nameOfFile)
     else if(a == '}')
     {
         numberOfBraces--;
+        if(prevent != '\n')
         fputc('\n', temp);
         for(int i = 0; i < 4*numberOfBraces; i++){fputc(' ', temp);}
         fputc(a, temp);
@@ -616,6 +617,7 @@ void autoIndent(char *nameOfFile)
      else if(b == '}')
      {
         a = b;
+        numberOfSpace = 0;
         continue;
      }
      else
@@ -630,12 +632,12 @@ void autoIndent(char *nameOfFile)
     }
     else
     {
-        if(prevent == '\n')
+        if(prevent == '}')
+           fputc('\n', temp);
+        if(prevent == '}' || prevent == '\n')
         {
             for(int i = 0; i < 4 * numberOfBraces; i++){fputc(' ', temp);}
         }
-        if(prevent == '}')
-           fputc('\n', temp);
         fputc(a, temp);
         prevent = a;
     }
