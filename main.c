@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <windows.h>
+#include <conio.h>
 int isCommanValid;
 int numberOfDirectoryWeGoInto = 0;
 
@@ -646,12 +647,79 @@ void autoIndent(char *nameOfFile)
     rename("temp.txt", nameOfFile);
 }
 
+void compare(FILE* file1, FILE* file2)
+{
+    int linenumber = 0;
+    char line1[10000], line2[10000];
+    int length1 = 1, length2 = 1;
+    char a = fgetc(file1);
+    while(a != EOF)
+    {
+        if(a == '\n')
+           length1++;
+        a = fgetc(file1);
+    }
+    a = fgetc(file2);
+    while(a != EOF)
+    {
+        if(a == '\n')
+           length2++;
+        a = fgetc(file2);
+    }
+    fseek(file1, 0, SEEK_SET);
+    fseek(file2, 0, SEEK_SET);
+    while(1)
+    {
+        linenumber++;
+        fgets(line1, sizeof(line1), file1);
+        fgets(line2 ,sizeof(line2), file2);
+        if(strcmp(line1, line2))
+        {
+            printf("========== #%d ==========\n", linenumber);
+            printf("%s\n", line1);
+            printf("%s\n", line2);
+            break;
+        }
+    }
+    if(length1 > length2)
+    {
+        for(int i = linenumber; i < length2; i++)
+        {
+            fgets(line1, sizeof(line1), file1);
+        }
+        printf("<<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<<\n", length2 + 1, length1);
+        char a = getc(file1);
+        while(a != EOF)
+        {
+        printf("%c", a);
+        a = getc(file1);
+        }
+        printf("\n");
+    }
+    else if(length2 > length1)
+    {
+        for(int i = linenumber; i < length1; i++)
+        {
+            fgets(line2, sizeof(line2), file2);
+        }
+        printf(">>>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>>>\n", length1 + 1, length2);
+        char a = getc(file2);
+        while(a != EOF)
+        {
+            printf("%c", a);
+            a = getc(file2);
+        }
+        printf("\n");
+    }
+}
+FILE* file1;
 void goToDir(char *checkCommand)
 {
 int weHaveSpace = 0;
 struct stat st = {0};
 char nameOfDir[1000];
-getchar();
+if(strcmp(checkCommand, "compare1"))
+    getchar();
 if(getchar() == '"'){
    getchar();
    weHaveSpace = 1;}
@@ -661,7 +729,7 @@ while(index != -1)
     memset(nameOfDir, 0, 1000);
     while((nameOfDir[index] = getchar()) != '/')
     {
-        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto"))))
+        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto") || !strcmp(checkCommand, "compare1"))))
         {
         nameOfDir[index] = '\0';
         FILE *check = fopen(nameOfDir, "r");
@@ -746,6 +814,22 @@ while(index != -1)
             autoIndent(nameOfDir);
             backToMainFolder();
             isCommanValid = 1;
+            return;
+        }
+        else if(!strcmp(checkCommand, "compare"))
+        {
+            file1 = fopen(nameOfDir, "r");
+            backToMainFolder();
+            goToDir("compare1");
+            return;
+        }
+        else if(!strcmp(checkCommand, "compare1"))
+        {
+            FILE* file2 = fopen(nameOfDir, "r");
+            compare(file1, file2);
+            fclose(file1);
+            fclose(file2);
+            backToMainFolder();
             return;
         }
         }
@@ -834,6 +918,10 @@ scanf("%s", commands);
     else if(!strcmp(commands, "auto-indent"))
     {
         goToDir("auto");
+    }
+    else if(!strcmp(commands, "compare"))
+    {
+        goToDir("compare");
     }
     if(isCommanValid == 0)
     {
