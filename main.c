@@ -803,6 +803,8 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                fclose(openToRead);
                return x - i + 1;
             }
+            fclose(openToRead);
+            return 0;
         }
     }
     else
@@ -938,6 +940,9 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
     }
    }
 }
+
+
+
 }
 
 FILE* file1;
