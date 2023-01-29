@@ -739,6 +739,206 @@ void compare(FILE* file1, FILE* file2)
     }
 }
 
+int findFunction(char* nameOfFile, char* string, int count, int at, int byword, int all, int starIndex)
+{
+if(at == 0 && all == 0 && count == 0 && byword == 0)
+{
+   if(starIndex == -1)
+   {
+      FILE* openToRead = fopen(nameOfFile, "r");
+      int index = 0;
+      char a;
+      a = getc(openToRead);
+      while(a != EOF)
+      {
+        if(a == string[0])
+        {
+            int output = index;
+            int check = 1;
+            for(int i = 1; i < strlen(string); i++)
+            {
+                a = getc(openToRead);
+                index++;
+                if(a != string[i])
+                {
+                   fseek(openToRead, output + 1, SEEK_SET);
+                   index = output;
+                   check = 0;
+                   break;
+                }
+            }
+            if(check){
+              fclose(openToRead);
+              return output;
+            }
+        }
+        a = getc(openToRead);
+        index++;
+      }
+      fclose(openToRead);
+      return -1;
+   }
+   else
+   {
+    if(starIndex == strlen(string) - 1)
+    {
+        string[strlen(string) - 1] = '\0';
+        return findFunction(nameOfFile, string, 0, 0, 0, 0, -1);
+    }
+    else if(starIndex == 0)
+    {
+        for(int i = 0; i < strlen(string) - 1; i++)
+        {
+            string[i] = string[i + 1];
+        }
+        string[strlen(string) - 1] = '\0';
+        int x = findFunction(nameOfFile, string, 0, 0, 0, 0, -1);
+        FILE* openToRead = fopen(nameOfFile, "r");
+        for(int i = 0; i < x; i++)
+        {
+            fseek(openToRead, x - i, SEEK_SET);
+            char a = getc(openToRead);
+            if(a == ' ' || a == '\0' || a == '\n')
+            {
+               fclose(openToRead);
+               return x - i + 1;
+            }
+        }
+    }
+    else
+    {
+        FILE* openToRead = fopen(nameOfFile, "r");
+        if(string[starIndex + 1] == ' ')
+        {
+            int index = 0, check = 1;
+            int output;
+            char a = getc(openToRead);
+            while(a != EOF)
+            {
+                check = 1;
+                if(a == string[0])
+                {
+                    output = index;
+                    for(int i = 1; i < starIndex; i++)
+                    {
+                     a = getc(openToRead);
+                     index++;
+                     if(a != string[i])
+                     {
+                      fseek(openToRead, output + 1, SEEK_SET);
+                      index = output;
+                      check = 0;
+                      break;
+                     }
+                    }
+                    if(check)
+                    {
+                    a = getc(openToRead);
+                    while(a != EOF && a != ' ' && a != '\0')
+                    {
+                        a = getc(openToRead);
+                    }
+                    a = getc(openToRead);
+                    if(string[starIndex + 2] == a)
+                    {
+                    for(int i = starIndex + 3; i < strlen(string); i++)
+                    {
+                        a = getc(openToRead);
+                        if(a != string[i])
+                        {
+                            fseek(openToRead, output + 1, SEEK_SET);
+                            index = output;
+                            check = 0;
+                            break;
+                        }
+                    }
+                    if(check)
+                    {
+                       fclose(openToRead);
+                       return output;
+                    }
+                    }
+                    fseek(openToRead, output + 1, SEEK_SET);
+                    }
+                }
+                a = getc(openToRead);
+                index++;
+            }
+            fclose(openToRead);
+            return -1;
+        }
+        else
+        {
+            char a = getc(openToRead);
+            int index = 0, check = 1, output, back = 0;
+            while(a != EOF)
+            {
+                check = 1;
+                if(a == string[0])
+                {
+                    output = index;
+                 for(int i = 1; i < starIndex; i++)
+                 {
+                    a = getc(openToRead);
+                    index++;back++;
+                    if(a != string[i])
+                    {
+                        check = 0;
+                        index = output;
+                        back = output;
+                        fseek(openToRead, output + 1, SEEK_SET);
+                        break;
+                    }
+                 }
+                 if(check)
+                 {
+                    a = getc(openToRead);
+                    back++;
+                    if(a == ' ' || a == '\0' || a == EOF || a == '\n')
+                    {
+                        check = 0;
+                        index = output;
+                        back = output;
+                        fseek(openToRead, output + 1, SEEK_SET);
+                        break;
+                    }
+                    while(a != ' ' && a != '\0' && a != EOF && a != '\n')
+                    {
+                     check = 1;
+                     if(a == string[starIndex + 1])
+                     {
+                        for(int i = starIndex + 2; i < strlen(string); i++)
+                        {
+                            a = getc(openToRead);
+                            if(a != string[i])
+                            {
+                                fseek(openToRead,back + 1 , SEEK_SET);
+                                check = 0;
+                            }
+                        }
+                        if(check)
+                        {
+                        fclose(openToRead);
+                        return output;
+                        }
+                     }
+                     a = getc(openToRead);
+                     back++;
+                    }
+                 }
+                 fseek(openToRead, output + 1, SEEK_SET);
+                }
+                a = getc(openToRead);
+                index++;
+                back++;
+            }
+            fclose(openToRead);
+            return -1;
+        }
+    }
+   }
+}
+}
 
 FILE* file1;
 void goToDir(char *checkCommand)
@@ -860,6 +1060,102 @@ while(index != -1)
             backToMainFolder();
             return;
         }
+        else if(!strcmp(checkCommand, "find"))
+        {
+            int cout = 0, at = 0, byword = 0, all = 0, option = 0, star = -1;
+            char command[10000];
+            scanf("%s",command);
+            if(!strcmp(command, "--str"))
+            {
+            getchar();
+            char *inputedString = malloc(1000000 * sizeof(char));
+            int index = 0, weHaveSpace = 0;
+            while(1)
+            {
+            scanf("%c", &inputedString[index]);
+            if(inputedString[index] == '*')
+               star = index;
+            if(index == 0 && inputedString[index] == '"')
+             {
+             weHaveSpace = 1;
+             continue;
+             }
+            if(inputedString[index] == '\\')
+            {
+            inputedString[index] = getchar();
+            if(inputedString[index] == 'n')
+               inputedString[index] = '\n';
+            else if(inputedString[index] == '"')
+               inputedString[index] = '"';
+            else if(inputedString[index] == '*')
+               inputedString[index] = '*';
+            else if(inputedString[index] == '\\')
+            {
+            char trash;
+            if((trash = getchar()) == 'n')
+            {
+                index++;
+                inputedString[index] = 'n';
+            }
+            else
+            {
+               inputedString[index] = '\\';
+               index++;
+               inputedString[index] = trash;
+            }
+            }
+            }
+            else if(inputedString[index] == ' ' && weHaveSpace == 0)
+            {
+            inputedString[index] = '\0';
+            option = 1;
+            break;
+            }
+            else if(inputedString[index] == '"' && weHaveSpace == 1)
+            {
+            inputedString[index] = '\0';
+            if(getchar() == ' ')
+               option = 1;
+            break;
+            }
+            else if(inputedString[index] == '\n')
+            {
+                inputedString[index] = '\0';
+                option = 0;
+                break;
+            }
+            index++;
+            }
+            if(option == 0){cout = 0; at = 0; byword = 0; all = 0;}
+            else
+            {
+            while(1){
+            scanf("%s", command);
+            if(!strcmp(command, "-at"))
+                scanf("%d", &at);
+            else if(!strcmp(command, "-byword"))
+               byword = 1;
+            else if(!strcmp(command, "-all"))
+               all = 1;
+            else if(!strcmp(command, "-count"))
+               cout = 1;
+            if(getchar() == '\n')
+               break;
+            }
+            }
+            if((at && all) || (at && cout) || (all && cout) || (cout && byword))
+                 printf("Invalid combination");
+            else if(all == 0)
+                printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star));
+            else
+            {
+             /*****************************************************************************************************/
+            }
+            isCommanValid = 1;
+            }
+            backToMainFolder();
+            return;
+        }
         }
         index = -1;
         break;
@@ -951,7 +1247,14 @@ scanf("%s", commands);
     {
         goToDir("compare");
     }
-    
+    else if(!strcmp(commands, "find"))
+    {
+        scanf("%s", commands);
+        if(!strcmp(commands, "--file"))
+        {
+            goToDir("find");
+        }
+    }
     else if(!strcmp(commands, "tree"))
     {
         int depth;
