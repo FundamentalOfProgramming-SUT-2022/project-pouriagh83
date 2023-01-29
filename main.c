@@ -117,6 +117,8 @@ void setStringInSpecified(char *fileName)
             inputedString[index] = '\n';
         else if(inputedString[index] == '"')
            inputedString[index] = '"';
+        else if(inputedString[index] == '*')
+           inputedString[index] = '*';
         else if(inputedString[index] == '\\')
         {
             char trash;
@@ -203,6 +205,7 @@ void catFile(char *nameOfFile)
     printf("%c", character);
     isCommanValid = 1;
     }
+    fclose(openToRead);
 }
 
 void removeStr(char *nameOfFile)
@@ -605,8 +608,20 @@ void autoIndent(char *nameOfFile)
     }
     else if(a == ' ')
     {
+        char b;
+        if(prevent == '}')
+        {
+            fputc('\n', temp);
+            prevent = '\n';
+            continue;
+        }
+        if(prevent == '\n' || prevent == '{')
+        {
+            while((b = getc(opentoRead)) == ' ');
+            a = b;
+            continue;
+        }
      numberOfSpace++;
-     char b;
      while((b = getc(opentoRead)) == ' '){numberOfSpace++;}
      if(b == '{')
      {
@@ -617,6 +632,15 @@ void autoIndent(char *nameOfFile)
      else if(b == '}')
      {
         a = b;
+        numberOfSpace = 0;
+        continue;
+     }
+     else if(prevent == '\n')
+     {
+        for(int i = 0; i < 4 * numberOfBraces; i++){fputc(' ', temp);}
+        for(int i = 0; i < numberOfSpace; i++){fputc(' ', temp);}
+        a = b;
+        prevent = ' ';
         numberOfSpace = 0;
         continue;
      }
@@ -714,6 +738,8 @@ void compare(FILE* file1, FILE* file2)
         printf("\n");
     }
 }
+
+
 FILE* file1;
 void goToDir(char *checkCommand)
 {
@@ -924,6 +950,16 @@ scanf("%s", commands);
     else if(!strcmp(commands, "compare"))
     {
         goToDir("compare");
+    }
+    
+    else if(!strcmp(commands, "tree"))
+    {
+        int depth;
+        scanf("%d", &depth);
+        if(depth < -1)
+           printf("Invalid depth");
+        
+     /**********************************************////*********************************************************      tree(depth);
     }
     if(isCommanValid == 0)
     {
