@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <windows.h>
 #include <conio.h>
+#include <dirent.h>
 int isCommanValid;
 int numberOfDirectoryWeGoInto = 0;
 
@@ -944,6 +945,35 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
 
 
 }
+void tree(int depth, char *nameOfFileOrDir, int firstDepth)
+{
+if(depth == 0)
+   return;
+struct dirent *entry;
+DIR *dir = opendir(nameOfFileOrDir);
+if(dir == NULL)
+   return;
+while((entry = readdir(dir)) != NULL)
+{
+     if(entry -> d_name[0] != '.' && (entry -> d_name[0] != 'p' || entry -> d_name[1] != 'e' || entry -> d_name[2] != 'r' || entry -> d_name[3] != 'v' || entry -> d_name[4] != 'i' || entry -> d_name[5] != 'o' || entry -> d_name[6] != 'u' || entry -> d_name[7] != 's'))
+     {
+        for(int i = 0; i < firstDepth - depth; i++){printf("|  ");}
+        printf("|--%s", entry -> d_name);
+        if(entry -> d_type == DT_DIR)
+        {
+            printf(":\n");
+            char nameOfDir[100];
+            strcpy(nameOfDir, nameOfFileOrDir);
+            strcat(nameOfDir, "/");
+            strcat(nameOfDir, entry -> d_name);
+            tree(depth - 1, nameOfDir, firstDepth);
+        }
+        else 
+           printf("\n");
+     }
+}
+closedir(dir);
+}
 
 FILE* file1;
 void goToDir(char *checkCommand)
@@ -1264,10 +1294,14 @@ scanf("%s", commands);
     {
         int depth;
         scanf("%d", &depth);
+        isCommanValid = 1;
         if(depth < -1)
-           printf("Invalid depth");
-        
-     /**********************************************////*********************************************************      tree(depth);
+           printf("Invalid depth\n");
+        else if(depth > -1)
+        {
+           printf("root:\n");
+           tree(depth, "./root", depth);
+        }
     }
     if(isCommanValid == 0)
     {
