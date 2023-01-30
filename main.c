@@ -969,7 +969,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
     }
    }
 }
-if(at == 0 && all == 0 && byword == 0 && count == 1)
+else if(at == 0 && all == 0 && byword == 0 && count == 1)
 {
 char string2[10000];
 strcpy(string2, string);
@@ -999,6 +999,87 @@ remove("tmp.txt");
 return i;
 }
 
+else if(at && all == 0 && byword == 0 && count == 0)
+{
+    char string2[10000];
+    strcpy(string2, string);
+    int y = 0, x = -1, z = 0;;
+    for(int i = 1; i < at; i++)
+    {
+     FILE* openToCopy = fopen(nameOfFile, "r");
+     FILE* temp = fopen("tmp.txt", "w");
+     if(i > 2)
+        z = 0;
+     fseek(openToCopy, x + y + 1 + z, SEEK_SET);
+     char a = getc(openToCopy);
+     while(a != EOF)
+     {
+       putc(a, temp);
+       a = getc(openToCopy);
+     }
+     fclose(temp);
+     fclose(openToCopy);
+     x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 1);
+     y += x + 1;
+     z = -y;
+     if(x == -1)
+     {
+        remove("tmp.txt");
+        return -1;
+     }
+     strcpy(string, string2);
+    }
+    FILE* openToCopy = fopen(nameOfFile, "r");
+    FILE* temp = fopen("tmp.txt", "w");
+    fseek(openToCopy, y, SEEK_SET);
+     char a = getc(openToCopy);
+     while(a != EOF)
+     {
+       putc(a, temp);
+       a = getc(openToCopy);
+     }
+     fclose(temp);
+     fclose(openToCopy);
+    x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 0);
+    remove("tmp.txt");
+    return x + y;
+}
+
+else if(at == 0 && all == 0 && byword == 1 && count == 0)
+{
+   int x = findFunction(nameOfFile, string, 0, 0, 0, 0, starIndex, 0);
+   if(x == -1)
+      return x;
+    FILE* openToRead = fopen(nameOfFile, "r");
+    int numberOfSpace = 0;
+   for(int i = 0; i < x; i++)
+   {
+     char a = fgetc(openToRead);
+     if(a == ' ' || a == '\n')
+        numberOfSpace++;
+   }
+   fclose(openToRead);
+   return numberOfSpace + 1;
+}
+
+else if(at == 0 && all == 1 && byword == 0 && count == 0)
+{
+    char string2[10000];
+    strcpy(string2, string);
+    for(int i = 0;; i++)
+    {
+        int x = findFunction(nameOfFile, string, 0, i + 1, 0, 0, starIndex, 0);
+        strcpy(string, string2);
+        if(x == -1)
+        {
+            printf("\n");
+           return 0;
+        }
+           if(i > 0)
+           printf(" ,");
+        printf("%d", x);
+    }
+}
 
 }
 void tree(int depth, char *nameOfFileOrDir, int firstDepth)
@@ -1240,7 +1321,7 @@ while(index != -1)
                 printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
             else
             {
-             /*****************************************************************************************************/
+                int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
             }
             isCommanValid = 1;
             }
