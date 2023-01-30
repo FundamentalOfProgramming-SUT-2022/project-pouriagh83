@@ -740,7 +740,7 @@ void compare(FILE* file1, FILE* file2)
     }
 }
 
-int findFunction(char* nameOfFile, char* string, int count, int at, int byword, int all, int starIndex)
+int findFunction(char* nameOfFile, char* string, int count, int at, int byword, int all, int starIndex, int weWannaIndex)
 {
 if(at == 0 && all == 0 && count == 0 && byword == 0)
 {
@@ -768,7 +768,11 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                    break;
                 }
             }
-            if(check){
+            if(check && weWannaIndex){
+                fclose(openToRead);
+                return index;
+            }
+            else if(check){
               fclose(openToRead);
               return output;
             }
@@ -784,7 +788,9 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
     if(starIndex == strlen(string) - 1)
     {
         string[strlen(string) - 1] = '\0';
-        return findFunction(nameOfFile, string, 0, 0, 0, 0, -1);
+        if(weWannaIndex)
+           return findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 1);
+        return findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 0);
     }
     else if(starIndex == 0)
     {
@@ -793,7 +799,9 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
             string[i] = string[i + 1];
         }
         string[strlen(string) - 1] = '\0';
-        int x = findFunction(nameOfFile, string, 0, 0, 0, 0, -1);
+        if(weWannaIndex)
+           return findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 1);
+        int x = findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 0);
         FILE* openToRead = fopen(nameOfFile, "r");
         for(int i = 0; i < x; i++)
         {
@@ -837,16 +845,20 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                     if(check)
                     {
                     a = getc(openToRead);
+                    index++;
                     while(a != EOF && a != ' ' && a != '\0')
                     {
                         a = getc(openToRead);
+                        index++;
                     }
                     a = getc(openToRead);
+                    index++;
                     if(string[starIndex + 2] == a)
                     {
                     for(int i = starIndex + 3; i < strlen(string); i++)
                     {
                         a = getc(openToRead);
+                        index++;
                         if(a != string[i])
                         {
                             fseek(openToRead, output + 1, SEEK_SET);
@@ -855,7 +867,12 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                             break;
                         }
                     }
-                    if(check)
+                    if(check && weWannaIndex)
+                    {
+                        fclose(openToRead);
+                        return index;
+                    }
+                    else if(check)
                     {
                        fclose(openToRead);
                        return output;
@@ -896,7 +913,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                  if(check)
                  {
                     a = getc(openToRead);
-                    back++;
+                    back++;index++;
                     if(a == ' ' || a == '\0' || a == EOF || a == '\n')
                     {
                         check = 0;
@@ -913,11 +930,19 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                         for(int i = starIndex + 2; i < strlen(string); i++)
                         {
                             a = getc(openToRead);
+                            index++;
                             if(a != string[i])
                             {
+                                index = back;
                                 fseek(openToRead,back + 1 , SEEK_SET);
                                 check = 0;
+                                break;
                             }
+                        }
+                        if(check && weWannaIndex)
+                        {
+                            fclose(openToRead);
+                            return index;
                         }
                         if(check)
                         {
@@ -926,9 +951,12 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                         }
                      }
                      a = getc(openToRead);
+                     index++;
                      back++;
                     }
                  }
+                 index = output;
+                 back = output;
                  fseek(openToRead, output + 1, SEEK_SET);
                 }
                 a = getc(openToRead);
@@ -936,12 +964,40 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                 back++;
             }
             fclose(openToRead);
-            return -1;
+               return -1;
         }
     }
    }
 }
-
+if(at == 0 && all == 0 && byword == 0 && count == 1)
+{
+char string2[10000];
+strcpy(string2, string);
+int i = 0;
+int x = findFunction(nameOfFile, string, 0, 0, 0, 0, starIndex, 1);
+strcpy(string, string2);
+int y = 0;
+while(x != -1)
+{
+i++;
+FILE* openToCopy = fopen(nameOfFile, "r");
+FILE* temp = fopen("tmp.txt", "w");
+fseek(openToCopy, x + y + 1, SEEK_SET);
+char a = getc(openToCopy);
+while(a != EOF)
+{
+    putc(a, temp);
+    a = getc(openToCopy);
+}
+fclose(temp);
+fclose(openToCopy);
+y += x + 1;
+x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 1);
+strcpy(string, string2);
+}
+remove("tmp.txt");
+return i;
+}
 
 
 }
@@ -1181,7 +1237,7 @@ while(index != -1)
             if((at && all) || (at && cout) || (all && cout) || (cout && byword))
                  printf("Invalid combination");
             else if(all == 0)
-                printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star));
+                printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
             else
             {
              /*****************************************************************************************************/
