@@ -152,6 +152,7 @@ void setStringInSpecified(char *fileName)
  scanf("%s", command);
  if(strcmp(command, "--pos") == 0)
  {
+    makePervious(fileName);
     getchar();
     int lineNumber, charNumber;
     scanf("%d", &lineNumber);
@@ -196,6 +197,7 @@ void setStringInSpecified(char *fileName)
 }
 void catFile(char *nameOfFile)
 {
+    makePervious(nameOfFile);
     FILE *openToRead = fopen(nameOfFile, "r");
     char character;
     while(character != EOF)
@@ -223,6 +225,7 @@ backOrForward = getchar();
 char character;
 if(backOrForward == 'b' || backOrForward == 'f')
 {
+    makePervious(nameOfFile);
 FILE *openToRead = fopen(nameOfFile, "r");
 FILE *tempFile = fopen("tmp.txt", "w");
 int whichLineWeStand = 1, whichCharWeStand = 0;
@@ -310,6 +313,7 @@ if(strcmp(command, "--pos") == 0)
     scanf("%s", command);
     if(strcmp(command, "-size") == 0)
     {
+        makePervious(nameOfFile);
         int numberOfCharacterToCopy;
         scanf("%d", &numberOfCharacterToCopy);
         getchar();getchar();
@@ -381,6 +385,7 @@ if(strcmp(command, "--pos") == 0)
     scanf("%s", command);
     if(strcmp(command, "-size") == 0)
     {
+        makePervious(nameOfFile);
         remove("U:/BasicProgramming/Project/Codes/clipboard.txt");
         int numberOfCharacterToCopy;
         scanf("%d", &numberOfCharacterToCopy);
@@ -514,6 +519,7 @@ void pasteStr(char *fileName)
     scanf("%d", &lineNumber);
     getchar();
     scanf("%d", &charNumber);
+    makePervious(fileName);
     FILE *clipboard = fopen("U:/BasicProgramming/Project/Codes/clipboard.txt", "r");
     FILE *openForWrite = fopen(fileName, "r");
     FILE *tmpFile = fopen("tmp.txt", "w");
@@ -578,6 +584,7 @@ isCommanValid = 1;
 
 void autoIndent(char *nameOfFile)
 {
+    makePervious(nameOfFile);
     FILE *opentoRead = fopen("t.txt", "r");
     FILE *temp = fopen("temp.txt", "w");
     int numberOfBraces = 0, numberOfSpace = 0;
@@ -769,6 +776,8 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                 }
             }
             if(check && weWannaIndex){
+                char b = getc(openToRead);
+                while(b != ' ' && b != EOF && b != '\n' && b != '\0'){b = getc(openToRead);index++;}
                 fclose(openToRead);
                 return index;
             }
@@ -1003,7 +1012,7 @@ else if(at && all == 0 && byword == 0 && count == 0)
 {
     char string2[10000];
     strcpy(string2, string);
-    int y = 0, x = -1, z = 0;;
+    int y = 0, x = -1, z = 0;
     for(int i = 1; i < at; i++)
     {
      FILE* openToCopy = fopen(nameOfFile, "r");
@@ -1029,6 +1038,7 @@ else if(at && all == 0 && byword == 0 && count == 0)
      }
      strcpy(string, string2);
     }
+    remove("tmp.txt");
     FILE* openToCopy = fopen(nameOfFile, "r");
     FILE* temp = fopen("tmp.txt", "w");
     fseek(openToCopy, y, SEEK_SET);
@@ -1040,7 +1050,10 @@ else if(at && all == 0 && byword == 0 && count == 0)
      }
      fclose(temp);
      fclose(openToCopy);
-    x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 0);
+    if(weWannaIndex)
+        x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 1);
+    else
+        x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 0);
     remove("tmp.txt");
     return x + y;
 }
@@ -1144,6 +1157,204 @@ while((entry = readdir(dir)) != NULL)
 }
 closedir(dir);
 }
+void replaceString(char *nameOfFile)
+{
+   char command[1000];
+   scanf("%s", command);
+   if(!strcmp(command, "--str1"))
+   {
+            getchar();
+            char *str1 = malloc(1000000 * sizeof(char));
+            int index = 0, weHaveSpace = 0, star = -1;
+            while(1)
+            {
+            scanf("%c", &str1[index]);
+            if(str1[index] == '*')
+               star = index;
+            if(index == 0 && str1[index] == '"')
+             {
+             weHaveSpace = 1;
+             continue;
+             }
+            if(str1[index] == '\\')
+            {
+            str1[index] = getchar();
+            if(str1[index] == 'n')
+               str1[index] = '\n';
+            else if(str1[index] == '"')
+               str1[index] = '"';
+            else if(str1[index] == '*')
+               str1[index] = '*';
+            else if(str1[index] == '\\')
+            {
+            char trash;
+            if((trash = getchar()) == 'n')
+            {
+                index++;
+                str1[index] = 'n';
+            }
+            else
+            {
+               str1[index] = '\\';
+               index++;
+               str1[index] = trash;
+            }
+            }
+            }
+            else if(str1[index] == ' ' && weHaveSpace == 0)
+            {
+            str1[index] = '\0';
+            break;
+            }
+            else if(str1[index] == '"' && weHaveSpace == 1)
+            {
+            str1[index] = '\0';
+            break;
+            }
+            index++;
+            }
+    scanf("%s", command);
+    if(!strcmp(command, "--str2"))
+    {
+                    getchar();
+            char *str2 = malloc(1000000 * sizeof(char));
+            index = 0, weHaveSpace = 0;
+            int option = 0;
+            while(1)
+            {
+            scanf("%c", &str2[index]);
+            if(index == 0 && str2[index] == '"')
+             {
+             weHaveSpace = 1;
+             continue;
+             }
+            if(str2[index] == '\\')
+            {
+            str1[index] = getchar();
+            if(str2[index] == 'n')
+               str2[index] = '\n';
+            else if(str2[index] == '"')
+               str2[index] = '"';
+            else if(str2[index] == '*')
+               str2[index] = '*';
+            else if(str2[index] == '\\')
+            {
+            char trash;
+            if((trash = getchar()) == 'n')
+            {
+                index++;
+                str2[index] = 'n';
+            }
+            else
+            {
+               str2[index] = '\\';
+               index++;
+               str2[index] = trash;
+            }
+            }
+            }
+            else if(str2[index] == ' ' && weHaveSpace == 0)
+            {
+            str2[index] = '\0';
+            option = 1;
+            break;
+            }
+            else if(str2[index] == '"' && weHaveSpace == 1)
+            {
+            str2[index] = '\0';
+            if(getchar() == ' ')
+               option = 1;
+            break;
+            }
+            index++;
+            }
+            int at = 1, all = 0;
+            if(option)
+            {
+                isCommanValid = 1;
+                while(1){
+                scanf("%s", command);
+                if(!strcmp(command, "-at"))
+                    scanf("%d", &at);
+                else if(!strcmp(command, "-all"))
+                   all = 1;
+                if(getchar() == '\n') break;
+                }
+                if(at == 1 && all == 0) {printf("Invalid option\n"); return;}
+                if(!at && !all) {isCommanValid = 0; return;}
+            }
+            makePervious(nameOfFile);
+            if(all == 0)
+            {
+                int startIndex = findFunction(nameOfFile, str1, 0, at, 0, 0, star, 0);
+                int endIndex = findFunction(nameOfFile, str1, 0, at, 0, 0, star, 1);
+                if(startIndex == -1) {printf("Invalid position");return;}
+                FILE *openToRead = fopen(nameOfFile, "r");
+                FILE *temp = fopen("tmp.txt", "w");
+                for(int i = 0; i < startIndex; i++)
+                {
+                 char a = fgetc(openToRead);
+                 fputc(a, temp);
+                }
+                for(int i = 0; i < strlen(str2); i++)
+                {
+                    fputc(str2[i], temp);
+                }
+                for(int i = 0; i <= endIndex - startIndex; i++)
+                {
+                    getc(openToRead);
+                }
+                for(int i = 0;;i++)
+                {
+                    char a = fgetc(openToRead);
+                    if(a == EOF)
+                       break;
+                    fputc(a, temp);
+                }
+                fclose(openToRead);
+                fclose(temp);
+                remove(nameOfFile);
+                rename("tmp.txt", nameOfFile);
+                return;
+            }
+            else if(all)
+            {
+             while(1)
+             {
+               int startIndex = findFunction(nameOfFile, str1, 0, 1, 0, 0, star, 0);
+               int endIndex = findFunction(nameOfFile, str1, 0, 1, 0, 0, star, 1);
+               if(startIndex == -1) return;
+                FILE *openToRead = fopen(nameOfFile, "r");
+                FILE *temp = fopen("tmp.txt", "w");
+                for(int i = 0; i < startIndex; i++)
+                {
+                 char a = fgetc(openToRead);
+                 fputc(a, temp);
+                }
+                for(int i = 0; i < strlen(str2); i++)
+                {
+                    fputc(str2[i], temp);
+                }
+                for(int i = 0; i <= endIndex - startIndex; i++)
+                {
+                    fgetc(openToRead);
+                }
+                for(int i = 0;;i++)
+                {
+                    char a = fgetc(openToRead);
+                    if(a == EOF)
+                       break;
+                    fputc(a, temp);
+                }
+                fclose(openToRead);
+                fclose(temp);
+                remove(nameOfFile);
+                rename("tmp.txt", nameOfFile);
+             }
+            }
+    }
+   }
+}
 
 FILE* file1;
 void goToDir(char *checkCommand)
@@ -1185,7 +1396,6 @@ while(index != -1)
         if(strcmp(secondCommand, "--str") == 0)
         {
             getchar();
-            makePervious(nameOfDir);
             setStringInSpecified(nameOfDir);
             backToMainFolder();
             return;
@@ -1204,7 +1414,6 @@ while(index != -1)
           scanf("%s", posCommnad);
           if(strcmp(posCommnad, "--pos") == 0)
           {
-            makePervious(nameOfDir);
              removeStr(nameOfDir);
           }
           backToMainFolder();
@@ -1218,7 +1427,6 @@ while(index != -1)
         }
         else if(strcmp(checkCommand, "cut") == 0)
         {
-         makePervious(nameOfDir);
          cutStr(nameOfDir);
          backToMainFolder();
          return;
@@ -1229,7 +1437,6 @@ while(index != -1)
           scanf("%s", posCommnad);
           if(strcmp(posCommnad, "--pos") == 0)
           {
-           makePervious(nameOfDir);
            pasteStr(nameOfDir);
           }
           backToMainFolder();
@@ -1243,7 +1450,6 @@ while(index != -1)
         }
         else if(!strcmp(checkCommand, "auto"))
         {
-            makePervious(nameOfDir);
             autoIndent(nameOfDir);
             backToMainFolder();
             isCommanValid = 1;
@@ -1348,18 +1554,25 @@ while(index != -1)
                break;
             }
             }
+            int x;
             if((at && all) || (at && cout) || (all && cout) || (cout && byword))
                  printf("Invalid combination");
-            else if(all == 1 && byword == 1)
-                int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
-            else if(at && byword == 1)
-                int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
-            else if(all == 0)
-                printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
-            else
-                int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
+            else if(all == 1 && byword == 1){
+               makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
+            else if(at && byword == 1){
+               makePervious(nameOfDir); printf("%d", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
+            else if(all == 0){
+               makePervious(nameOfDir); printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
+            else{
+               makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
             isCommanValid = 1;
             }
+            backToMainFolder();
+            return;
+        }
+        else if(!strcmp(checkCommand, "replace"))
+        {
+            replaceString(nameOfDir);
             backToMainFolder();
             return;
         }
@@ -1460,6 +1673,14 @@ scanf("%s", commands);
         if(!strcmp(commands, "--file"))
         {
             goToDir("find");
+        }
+    }
+    else if(!strcmp(commands, "replace"))
+    {
+        scanf("%s", commands);
+        if(!strcmp(commands, "--file"))
+        {
+            goToDir("replace");
         }
     }
     else if(!strcmp(commands, "tree"))
