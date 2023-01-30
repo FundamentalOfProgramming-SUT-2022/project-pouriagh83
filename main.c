@@ -1081,6 +1081,39 @@ else if(at == 0 && all == 1 && byword == 0 && count == 0)
     }
 }
 
+else if(at && all == 0 && byword == 1 && count == 0)
+{
+    int x = findFunction(nameOfFile, string, 0, at, 0, 0, starIndex, 0);
+    if(x == -1)
+      return x;
+    FILE* openToRead = fopen(nameOfFile, "r");
+    int numberOfSpace = 0;
+    for(int i = 0; i < x; i++)
+    {
+     char a = fgetc(openToRead);
+     if(a == ' ' || a == '\n')
+        numberOfSpace++;
+    }
+    fclose(openToRead);
+    return numberOfSpace + 1;
+}
+
+else if(at = 0 && all == 1 && byword == 1 && count == 0)
+{
+    for(int i = 1;; i++)
+    {
+        if(i > 1)
+           printf(", ");
+    int x = findFunction(nameOfFile, string, 0, i, 1, 0, starIndex, 0);
+    if(x == -1)
+    {
+        printf("\n");
+        return 0;
+    }
+    printf("%d", x);
+    }
+}
+
 }
 void tree(int depth, char *nameOfFileOrDir, int firstDepth)
 {
@@ -1317,12 +1350,14 @@ while(index != -1)
             }
             if((at && all) || (at && cout) || (all && cout) || (cout && byword))
                  printf("Invalid combination");
+            else if(all == 1 && byword == 1)
+                int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
+            else if(at && byword == 1)
+                int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
             else if(all == 0)
                 printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
             else
-            {
                 int x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);
-            }
             isCommanValid = 1;
             }
             backToMainFolder();
