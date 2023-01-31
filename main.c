@@ -7,9 +7,11 @@
 #include <windows.h>
 #include <conio.h>
 #include <dirent.h>
+int lineNUmberGrep;
 int isCommanValid;
 int numberOfDirectoryWeGoInto = 0;
-
+char giveGrepString[10000];
+int grepOption;
 void backToMainFolder()
 {
 for(int i = 0; i < numberOfDirectoryWeGoInto; i++)
@@ -754,9 +756,11 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
    if(starIndex == -1)
    {
       FILE* openToRead = fopen(nameOfFile, "r");
+      int weHaveEnter = 0;
       int index = 0;
       char a;
       a = getc(openToRead);
+      if(a == '\n') weHaveEnter++;
       while(a != EOF)
       {
         if(a == string[0])
@@ -766,10 +770,11 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
             for(int i = 1; i < strlen(string); i++)
             {
                 a = getc(openToRead);
+                if(a == '\n') weHaveEnter++;
                 index++;
                 if(a != string[i])
                 {
-                   fseek(openToRead, output + 1, SEEK_SET);
+                   fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                    index = output;
                    check = 0;
                    break;
@@ -787,6 +792,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
             }
         }
         a = getc(openToRead);
+        if(a == '\n') weHaveEnter++;
         index++;
       }
       fclose(openToRead);
@@ -828,11 +834,13 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
     else
     {
         FILE* openToRead = fopen(nameOfFile, "r");
+        int weHaveEnter = 0;
         if(string[starIndex + 1] == ' ')
         {
             int index = 0, check = 1;
             int output;
             char a = getc(openToRead);
+            if(a == '\n') weHaveEnter++;
             while(a != EOF)
             {
                 check = 1;
@@ -842,10 +850,11 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                     for(int i = 1; i < starIndex; i++)
                     {
                      a = getc(openToRead);
+                     if(a == '\n') weHaveEnter++;
                      index++;
                      if(a != string[i])
                      {
-                      fseek(openToRead, output + 1, SEEK_SET);
+                      fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                       index = output;
                       check = 0;
                       break;
@@ -854,6 +863,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                     if(check)
                     {
                     a = getc(openToRead);
+                    if(a == '\n') weHaveEnter++;
                     index++;
                     while(a != EOF && a != ' ' && a != '\0')
                     {
@@ -861,16 +871,18 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                         index++;
                     }
                     a = getc(openToRead);
+                    if(a == '\n') weHaveEnter++;
                     index++;
                     if(string[starIndex + 2] == a)
                     {
                     for(int i = starIndex + 3; i < strlen(string); i++)
                     {
                         a = getc(openToRead);
+                        if(a == '\n') weHaveEnter++;
                         index++;
                         if(a != string[i])
                         {
-                            fseek(openToRead, output + 1, SEEK_SET);
+                            fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                             index = output;
                             check = 0;
                             break;
@@ -887,7 +899,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                        return output;
                     }
                     }
-                    fseek(openToRead, output + 1, SEEK_SET);
+                    fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                     }
                 }
                 a = getc(openToRead);
@@ -898,7 +910,9 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
         }
         else
         {
+            int weHaveEnter = 0;
             char a = getc(openToRead);
+            if(a == '\n') weHaveEnter++;
             int index = 0, check = 1, output, back = 0;
             while(a != EOF)
             {
@@ -909,26 +923,28 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                  for(int i = 1; i < starIndex; i++)
                  {
                     a = getc(openToRead);
+                    if(a == '\n') weHaveEnter++;
                     index++;back++;
                     if(a != string[i])
                     {
                         check = 0;
                         index = output;
                         back = output;
-                        fseek(openToRead, output + 1, SEEK_SET);
+                        fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                         break;
                     }
                  }
                  if(check)
                  {
                     a = getc(openToRead);
+                    if(a == '\n') weHaveEnter++;
                     back++;index++;
                     if(a == ' ' || a == '\0' || a == EOF || a == '\n')
                     {
                         check = 0;
                         index = output;
                         back = output;
-                        fseek(openToRead, output + 1, SEEK_SET);
+                        fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                         break;
                     }
                     while(a != ' ' && a != '\0' && a != EOF && a != '\n')
@@ -939,11 +955,12 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                         for(int i = starIndex + 2; i < strlen(string); i++)
                         {
                             a = getc(openToRead);
+                            if(a == '\n') weHaveEnter++;
                             index++;
                             if(a != string[i])
                             {
                                 index = back;
-                                fseek(openToRead,back + 1 , SEEK_SET);
+                                fseek(openToRead,back + 1 + weHaveEnter, SEEK_SET);
                                 check = 0;
                                 break;
                             }
@@ -960,15 +977,17 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                         }
                      }
                      a = getc(openToRead);
+                     if(a == '\n') weHaveEnter++;
                      index++;
                      back++;
                     }
                  }
                  index = output;
                  back = output;
-                 fseek(openToRead, output + 1, SEEK_SET);
+                 fseek(openToRead, output + 1 + weHaveEnter, SEEK_SET);
                 }
                 a = getc(openToRead);
+                if(a == '\n') weHaveEnter++;
                 index++;
                 back++;
             }
@@ -980,46 +999,24 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
 }
 else if(at == 0 && all == 0 && byword == 0 && count == 1)
 {
-char string2[10000];
-strcpy(string2, string);
 int i = 0;
-int x = findFunction(nameOfFile, string, 0, 0, 0, 0, starIndex, 1);
-strcpy(string, string2);
-int y = 0;
-while(x != -1)
+for(i = 1;;i++)
 {
-i++;
-FILE* openToCopy = fopen(nameOfFile, "r");
-FILE* temp = fopen("tmp.txt", "w");
-fseek(openToCopy, x + y + 1, SEEK_SET);
-char a = getc(openToCopy);
-while(a != EOF)
-{
-    putc(a, temp);
-    a = getc(openToCopy);
+    if(findFunction(nameOfFile, string, 0, i, 0, 0, starIndex, 0) == -1) break;
 }
-fclose(temp);
-fclose(openToCopy);
-y += x + 1;
-x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 1);
-strcpy(string, string2);
-}
-remove("tmp.txt");
-return i;
+return i - 1;
 }
 
 else if(at && all == 0 && byword == 0 && count == 0)
 {
     char string2[10000];
     strcpy(string2, string);
-    int y = 0, x = -1, z = 0;
+    int y = 0, x;
     for(int i = 1; i < at; i++)
     {
      FILE* openToCopy = fopen(nameOfFile, "r");
      FILE* temp = fopen("tmp.txt", "w");
-     if(i > 2)
-        z = 0;
-     fseek(openToCopy, x + y + 1 + z, SEEK_SET);
+     fseek(openToCopy, y, SEEK_SET);
      char a = getc(openToCopy);
      while(a != EOF)
      {
@@ -1030,7 +1027,6 @@ else if(at && all == 0 && byword == 0 && count == 0)
      fclose(openToCopy);
      x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 1);
      y += x + 1;
-     z = -y;
      if(x == -1)
      {
         remove("tmp.txt");
@@ -1055,6 +1051,7 @@ else if(at && all == 0 && byword == 0 && count == 0)
     else
         x = findFunction("tmp.txt", string, 0, 0, 0, 0, starIndex, 0);
     remove("tmp.txt");
+    if(x == -1) return x;
     return x + y;
 }
 
@@ -1216,7 +1213,7 @@ void replaceString(char *nameOfFile)
     scanf("%s", command);
     if(!strcmp(command, "--str2"))
     {
-                    getchar();
+            getchar();
             char *str2 = malloc(1000000 * sizeof(char));
             index = 0, weHaveSpace = 0;
             int option = 0;
@@ -1356,13 +1353,141 @@ void replaceString(char *nameOfFile)
    }
 }
 
+char* grepString()
+{
+            getchar();
+            char *inputedString = malloc(1000000 * sizeof(char));
+            int index = 0, weHaveSpace = 0;
+            while(1)
+            {
+            scanf("%c", &inputedString[index]);
+            if(index == 0 && inputedString[index] == '"')
+             {
+             weHaveSpace = 1;
+             continue;
+             }
+            if(inputedString[index] == '\\')
+            {
+            inputedString[index] = getchar();
+            if(inputedString[index] == 'n')
+               inputedString[index] = '\n';
+            else if(inputedString[index] == '"')
+               inputedString[index] = '"';
+            else if(inputedString[index] == '*')
+               inputedString[index] = '*';
+            else if(inputedString[index] == '\\')
+            {
+            char trash;
+            if((trash = getchar()) == 'n')
+            {
+                index++;
+                inputedString[index] = 'n';
+            }
+            else
+            {
+               inputedString[index] = '\\';
+               index++;
+               inputedString[index] = trash;
+            }
+            }
+            }
+            else if(inputedString[index] == ' ' && weHaveSpace == 0)
+            {
+            inputedString[index] = '\0';
+            break;
+            }
+            else if(inputedString[index] == '"' && weHaveSpace == 1)
+            {
+            inputedString[index] = '\0';
+            break;
+            }
+            index++;
+            }
+            return inputedString;
+}
+
+void grep(char* nameOfFile)
+{
+    makePervious(nameOfFile);
+    int previous = -1;
+    isCommanValid = 1;
+ if(grepOption == -1)
+ {
+  for(int i = 1;;i++)
+  {
+  int x = findFunction(nameOfFile, giveGrepString, 0, i, 0, 0, -1, 0);
+  if(x == -1) break;
+  FILE* openToPrint = fopen(nameOfFile, "r");
+  int j;
+  for(j = 0; j <= x; j++)
+  {
+   fseek(openToPrint, x - j, SEEK_SET);
+   if(x - j != 0)
+   if(getc(openToPrint) == '\n') break;
+  }
+  if(j == x + 1) j = x;
+  if(x - j == previous) {continue; fclose(openToPrint);}
+  previous = x - j;
+  printf("%s:   ", nameOfFile);
+  char a = getc(openToPrint);
+  while(a != '\n' && a != EOF)
+  {
+   printf("%c",a);
+   a = getc(openToPrint);
+  }
+  printf("\n");
+  fclose(openToPrint);
+  }
+ }
+ else if(grepOption == 0)
+ {
+  int x = findFunction(nameOfFile, giveGrepString, 0, 0, 0, 0, -1, 0);
+  if(x == -1) return;;
+  FILE* openToPrint = fopen(nameOfFile, "r");
+  int j;
+  for(j = 0; j <= x; j++)
+  {
+   fseek(openToPrint, x - j, SEEK_SET);
+   if(x - j != 0)
+   if(getc(openToPrint) == '\n') break;
+  }
+  printf("%s", nameOfFile);
+  char a = getc(openToPrint);
+  printf("\n");
+  fclose(openToPrint);
+ }
+ else if(grepOption == 1)
+ {
+  for(int i = 1;;i++)
+  {
+  int x = findFunction(nameOfFile, giveGrepString, 0, i, 0, 0, -1, 0);
+  if(x == -1) break;
+  FILE* openToPrint = fopen(nameOfFile, "r");
+  int j;
+  for(j = 0; j <= x; j++)
+  {
+   fseek(openToPrint, x - j, SEEK_SET);
+   if(x - j != 0)
+   if(getc(openToPrint) == '\n') break;
+  }
+  if(j == x + 1) j = x;
+  if(x - j == previous) {continue; fclose(openToPrint);}
+  previous = x - j;
+  char a = getc(openToPrint);
+  lineNUmberGrep++;
+  fclose(openToPrint);
+  }
+ }
+}
+
 FILE* file1;
 void goToDir(char *checkCommand)
 {
+    int weHaveAnotherLoc = 0;
 int weHaveSpace = 0;
 struct stat st = {0};
 char nameOfDir[1000];
-if(strcmp(checkCommand, "compare1"))
+if(strcmp(checkCommand, "compare1") && strcmp(checkCommand, "grepDir"))
     getchar();
 if(getchar() == '"'){
    getchar();
@@ -1373,7 +1498,9 @@ while(index != -1)
     memset(nameOfDir, 0, 1000);
     while((nameOfDir[index] = getchar()) != '/')
     {
-        if((nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto") || !strcmp(checkCommand, "compare1"))))
+        if(!strcmp(checkCommand, "grepDir") && ((nameOfDir[index] == '"' && weHaveSpace == 1 && getchar() == ' ') || (nameOfDir[index] == ' ' && weHaveSpace == 0)))
+           weHaveAnotherLoc = 1;
+        if(weHaveAnotherLoc || (nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto") || !strcmp(checkCommand, "compare1") || !strcmp(checkCommand, "grepDir"))))
         {
         nameOfDir[index] = '\0';
         FILE *check = fopen(nameOfDir, "r");
@@ -1576,6 +1703,17 @@ while(index != -1)
             backToMainFolder();
             return;
         }
+        else if(!strcmp(checkCommand, "grepDir"))
+        {
+         grep(nameOfDir);
+         backToMainFolder();
+         if(weHaveAnotherLoc)
+         {
+            weHaveAnotherLoc = 0;
+            goToDir("grepDir");
+         }
+         return;
+        }
         }
         index = -1;
         break;
@@ -1681,6 +1819,28 @@ scanf("%s", commands);
         if(!strcmp(commands, "--file"))
         {
             goToDir("replace");
+        }
+    }
+    else if(!strcmp(commands, "grep"))
+    {
+        lineNUmberGrep = 0;
+        grepOption = -1;//0 = c  1 = l
+        scanf("%s", commands);
+        if(!strcmp(commands, "-c")){
+           grepOption = 0;scanf("%s", commands);}
+        else if(!strcmp(commands, "-l")){
+           grepOption = 1;scanf("%s", commands);}
+        if(!strcmp(commands, "--str"))
+        {
+        strcpy(giveGrepString, grepString());
+        scanf("%s", commands);
+        if(!strcmp(commands, "--file"))
+        {
+            getchar();
+            goToDir("grepDir");
+            if(grepOption == 1)
+               printf("%d\n", lineNUmberGrep);
+        }
         }
     }
     else if(!strcmp(commands, "tree"))
