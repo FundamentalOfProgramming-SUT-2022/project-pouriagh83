@@ -15,6 +15,8 @@ int numberOfDirectoryWeGoInto = 0;
 char giveGrepString[10000];
 int grepOption;
 int armanOffOrOn;
+int armanGrep;
+int armanForPrintGrep;
 char armanString[10000];
 void backToMainFolder()
 {
@@ -1049,17 +1051,19 @@ else if(at && all == 0 && byword == 0 && count == 0)
 {
     char string2[10000];
     strcpy(string2, string);
-    int y = 0, x;
+    int y = 0, x, weHaveEnter = 0;
     for(int i = 1; i < at; i++)
     {
      FILE* openToCopy = fopen(nameOfFile, "r");
      FILE* temp = fopen("tmp.txt", "w");
      fseek(openToCopy, y, SEEK_SET);
+     weHaveEnter = 0;
      char a = getc(openToCopy);
      while(a != EOF)
      {
        putc(a, temp);
        a = getc(openToCopy);
+       if(a == '\n') weHaveEnter++;
      }
      fclose(temp);
      fclose(openToCopy);
@@ -1483,17 +1487,20 @@ char* grepString()
             }
             return inputedString;
 }
-
+char saveGrep[100000];
 void grep(char* nameOfFile)
 {
     makePervious(nameOfFile);
     int previous = -1;
     isCommanValid = 1;
+    if(armanGrep) strcpy(giveGrepString, armanString);
  if(grepOption == -1)
  {
   for(int i = 1;;i++)
   {
   int x = findFunction(nameOfFile, giveGrepString, 0, i, 0, 0, -1, 0);
+  FILE *check = fopen(nameOfFile, "r");
+  fclose(check);
   if(x == -1) break;
   FILE* openToPrint = fopen(nameOfFile, "r");
   int j;
@@ -1506,14 +1513,16 @@ void grep(char* nameOfFile)
   if(j == x + 1) j = x;
   if(x - j == previous) {continue; fclose(openToPrint);}
   previous = x - j;
-  printf("%s:   ", nameOfFile);
+  char why[10000];
+  sprintf(why, "%s:   ", nameOfFile);
+  strcat(saveGrep, why);
   char a = getc(openToPrint);
   while(a != '\n' && a != EOF)
   {
-   printf("%c",a);
+   strncat(saveGrep, &a, 1);
    a = getc(openToPrint);
   }
-  printf("\n");
+  strcat(saveGrep, "\n");
   fclose(openToPrint);
   }
  }
@@ -1529,9 +1538,11 @@ void grep(char* nameOfFile)
    if(x - j != 0)
    if(getc(openToPrint) == '\n') break;
   }
-  printf("%s", nameOfFile);
+  char why[10000];
+  sprintf(why, "%s", nameOfFile);
+  strcat(saveGrep, why);
   char a = getc(openToPrint);
-  printf("\n");
+  strcat(saveGrep, "\n");
   fclose(openToPrint);
  }
  else if(grepOption == 1)
@@ -1585,6 +1596,7 @@ while(index != -1)
     memset(nameOfDir, 0, 1000);
     while((nameOfDir[index] = getchar()) != '/')
     {
+        if(index == 0 && nameOfDir[0] == 'D' && !strcmp(checkCommand, "grepDir")) {armanOffOrOn = 1;armanForPrintGrep = 1; arman(); return;}
         if(!strcmp(checkCommand, "grepDir") && ((nameOfDir[index] == '"' && weHaveSpace == 1 && getchar() == ' ') || (nameOfDir[index] == ' ' && weHaveSpace == 0)))
            weHaveAnotherLoc = 1;
         if(!strcmp(checkCommand, "cat") && ((nameOfDir[index] == '"' && weHaveSpace == 1 && getchar() == ' ') || (nameOfDir[index] == ' ' && weHaveSpace == 0)))
@@ -1869,6 +1881,7 @@ while(index != -1)
 
 void arman()
 {
+    if(armanForPrintGrep) strcpy(armanString, saveGrep);
 char command[100];
    scanf("%s", command);
 if(!strcmp(command, "insertstr"))
@@ -1887,7 +1900,27 @@ else if(!strcmp(command, "find"))
        goToDir("find");
     }
 }
-//baraye find bayad armano khomoosh koni
+else if(!strcmp(command, "grep"))
+{
+     lineNUmberGrep = 0;
+        grepOption = -1;//0 = c  1 = l
+        scanf("%s", command);
+        if(!strcmp(command, "-c")){
+           grepOption = 0;scanf("%s", command);}
+        else if(!strcmp(command, "-l")){
+           grepOption = 1;scanf("%s", command);}
+        if(!strcmp(command, "--file"))
+        {
+            armanGrep = 1;
+            armanOffOrOn = 0;
+            getchar();
+            goToDir("grepDir");
+            printf("%s", saveGrep);
+            if(grepOption == 1)
+               printf("%d\n", lineNUmberGrep);
+        }
+        
+}
 }
 
 int main()
@@ -1895,7 +1928,7 @@ int main()
 char commands[1000];
 while(1)
 {
-isCommanValid = 0;armanOffOrOn = 0;armanFind = 0;
+isCommanValid = 0;armanOffOrOn = 0;armanFind = 0, armanGrep = 0, armanForPrintGrep = 0;
 memset(armanString, 0, 10000);
 scanf("%s", commands);
 
@@ -1973,6 +2006,7 @@ scanf("%s", commands);
     }
     else if(!strcmp(commands, "grep"))
     {
+        memset(saveGrep, 0, 100000);
         lineNUmberGrep = 0;
         grepOption = -1;//0 = c  1 = l
         scanf("%s", commands);
@@ -1988,8 +2022,12 @@ scanf("%s", commands);
         {
             getchar();
             goToDir("grepDir");
+            if(armanForPrintGrep == 0)
+            {
+            printf("%s", saveGrep);
             if(grepOption == 1)
                printf("%d\n", lineNUmberGrep);
+            }
         }
         }
     }
