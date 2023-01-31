@@ -7,11 +7,15 @@
 #include <windows.h>
 #include <conio.h>
 #include <dirent.h>
+void arman();
+int armanFind;
 int lineNUmberGrep;
 int isCommanValid;
 int numberOfDirectoryWeGoInto = 0;
 char giveGrepString[10000];
 int grepOption;
+int armanOffOrOn;
+char armanString[10000];
 void backToMainFolder()
 {
 for(int i = 0; i < numberOfDirectoryWeGoInto; i++)
@@ -104,6 +108,7 @@ void createDir()
 void setStringInSpecified(char *fileName)
 {
  char *inputedString = malloc(1000000 * sizeof(char));
+ if(armanOffOrOn == 0){
  int index = 0, weHaveSpace = 0;
  while(1)
  {
@@ -150,6 +155,8 @@ void setStringInSpecified(char *fileName)
     }
     index++;
  }
+    }
+    if(armanOffOrOn) strcat(inputedString, armanString);
  char command[100];
  scanf("%s", command);
  if(strcmp(command, "--pos") == 0)
@@ -207,7 +214,10 @@ void catFile(char *nameOfFile)
     character = getc(openToRead);
     if(character == EOF)
        break;
-    printf("%c", character);
+    if(armanOffOrOn == 0)
+       printf("%c", character);
+    else
+       strncat(armanString, &character, 1);
     isCommanValid = 1;
     }
     fclose(openToRead);
@@ -711,9 +721,21 @@ void compare(FILE* file1, FILE* file2)
         fgets(line2 ,sizeof(line2), file2);
         if(strcmp(line1, line2))
         {
+            if(armanOffOrOn == 0){
             printf("========== #%d ==========\n", linenumber);
             printf("%s\n", line1);
-            printf("%s\n", line2);
+            printf("%s\n", line2);}
+            else
+            {
+                char x[100];
+                sprintf(x, "%d", linenumber);
+                strcat(armanString, "========== #");
+                strcat(armanString, x);
+                strcat(armanString,  "==========\n");
+                strcat(armanString, line1);
+                strcat(armanString, "\n");
+                strcat(armanString, line2);
+            }
             break;
         }
     }
@@ -723,14 +745,21 @@ void compare(FILE* file1, FILE* file2)
         {
             fgets(line1, sizeof(line1), file1);
         }
-        printf("<<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<<\n", length2 + 1, length1);
+        if(armanOffOrOn == 0) printf("<<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<<\n", length2 + 1, length1);
+        else
+        {
+            char a[1000];
+            sprintf(a, "<<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<<\n", length2 + 1, length1);
+            strcat(armanString, a);
+        } 
         char a = getc(file1);
         while(a != EOF)
         {
         printf("%c", a);
         a = getc(file1);
         }
-        printf("\n");
+        if(armanOffOrOn == 0) printf("\n");
+        else strcat(armanString, "\n");
     }
     else if(length2 > length1)
     {
@@ -738,14 +767,21 @@ void compare(FILE* file1, FILE* file2)
         {
             fgets(line2, sizeof(line2), file2);
         }
-        printf(">>>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>>>\n", length1 + 1, length2);
+        if(armanOffOrOn == 0) printf(">>>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>>>\n", length1 + 1, length2);
+        else
+        {
+            char x[1000];
+            sprintf(x, ">>>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>>>\n", length1 + 1, length2);
+            strcat(armanString, x);
+        }
         char a = getc(file2);
         while(a != EOF)
         {
-            printf("%c", a);
+            if(armanOffOrOn == 0) printf("%c", a);
+            else strncat(armanString, &a, 1);
             a = getc(file2);
         }
-        printf("\n");
+        if(armanOffOrOn == 0) printf("\n");
     }
 }
 
@@ -1084,12 +1120,16 @@ else if(at == 0 && all == 1 && byword == 0 && count == 0)
         strcpy(string, string2);
         if(x == -1)
         {
-            printf("\n");
+           if(armanOffOrOn == 0) printf("\n");
            return 0;
         }
-           if(i > 0)
-           printf(" ,");
-        printf("%d", x);
+           if(i > 0){
+           if(armanOffOrOn == 0) printf(" ,");
+           else strcat(armanString, " ,");
+           }
+       if(armanOffOrOn == 0) printf("%d", x);
+       else{char a[100]; sprintf(a, "%d", x);
+       strcat(armanString, a);}
     }
 }
 
@@ -1115,15 +1155,29 @@ else if(at == 0 && all == 1 && byword == 1 && count == 0)
     for(int i = 1;; i++)
     {
     int x = findFunction(nameOfFile, string, 0, i, 1, 0, starIndex, 0);
-    if(x == -1 && i == 1) {printf("-1\n");return -1;}
+    if(x == -1 && i == 1)
+     {
+     if(armanOffOrOn == 0) printf("-1\n");
+     else strcat(armanString, "-1");
+     return -1;
+     }
     if(x == -1)
     {
-        printf("\n");
+       if(armanOffOrOn == 0) printf("\n");
         return 0;
     }
     if(i > 1)
-        printf(", ");
-    printf("%d", x);
+    {
+       if(armanOffOrOn == 0) printf(", ");
+       else strcat(armanString, ", ");
+    }
+    if(armanOffOrOn == 0) printf("%d", x);
+    else
+    {
+        char a[100];
+        sprintf(a, "%d", x);
+        strcat(armanString, a);
+    }
     }
 }
 
@@ -1140,19 +1194,40 @@ while((entry = readdir(dir)) != NULL)
 {
      if(entry -> d_name[0] != '.' && (entry -> d_name[0] != 'p' || entry -> d_name[1] != 'e' || entry -> d_name[2] != 'r' || entry -> d_name[3] != 'v' || entry -> d_name[4] != 'i' || entry -> d_name[5] != 'o' || entry -> d_name[6] != 'u' || entry -> d_name[7] != 's'))
      {
-        for(int i = 0; i < firstDepth - depth; i++){printf("|  ");}
-        printf("|--%s", entry -> d_name);
+        for(int i = 0; i < firstDepth - depth; i++)
+        { 
+            if(armanOffOrOn == 0)
+               printf("|  ");
+            else
+               strcat(armanString, "|  ");
+        }
+        if(armanOffOrOn == 0)
+           printf("|--%s", entry -> d_name);
+        else
+        {
+           strcat(armanString, "|--");
+           strcat(armanString, entry ->d_name);
+        }
         if(entry -> d_type == DT_DIR)
         {
-            printf(":\n");
+            if(armanOffOrOn == 0)
+               printf(":\n");
+            else
+               strcat(armanString, ":\n");
             char nameOfDir[100];
             strcpy(nameOfDir, nameOfFileOrDir);
             strcat(nameOfDir, "/");
             strcat(nameOfDir, entry -> d_name);
             tree(depth - 1, nameOfDir, firstDepth);
         }
-        else 
-           printf("\n");
+        else
+        {
+            if(armanOffOrOn == 0)
+               printf("\n");
+            else
+               strcat(armanString, "\n");
+        }
+        
      }
 }
 closedir(dir);
@@ -1483,10 +1558,19 @@ void grep(char* nameOfFile)
  }
 }
 
+int checkArman()
+{
+    char command[100];
+    scanf("%s", command);
+    if(!strcmp(command, "=D"))
+       return 1;
+    return 0;
+}
+
 FILE* file1;
 void goToDir(char *checkCommand)
 {
-    int weHaveAnotherLoc = 0;
+    int weHaveAnotherLoc = 0, armanForCommands = 0, option = 0;
 int weHaveSpace = 0;
 struct stat st = {0};
 char nameOfDir[1000];
@@ -1503,8 +1587,20 @@ while(index != -1)
     {
         if(!strcmp(checkCommand, "grepDir") && ((nameOfDir[index] == '"' && weHaveSpace == 1 && getchar() == ' ') || (nameOfDir[index] == ' ' && weHaveSpace == 0)))
            weHaveAnotherLoc = 1;
-        if(weHaveAnotherLoc || (nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto") || !strcmp(checkCommand, "compare1") || !strcmp(checkCommand, "grepDir"))))
+        if(!strcmp(checkCommand, "cat") && ((nameOfDir[index] == '"' && weHaveSpace == 1 && getchar() == ' ') || (nameOfDir[index] == ' ' && weHaveSpace == 0)))
         {
+            armanForCommands = checkArman();
+            armanOffOrOn = armanForCommands;
+        }
+        else if(!strcmp(checkCommand, "compare1") && ((nameOfDir[index] == '"' && weHaveSpace == 1 && getchar() == ' ') || (nameOfDir[index] == ' ' && weHaveSpace == 0)))
+        {
+            armanForCommands = checkArman();
+            armanOffOrOn = armanForCommands;
+        }
+        if(armanForCommands || weHaveAnotherLoc || (nameOfDir[index] == '"' && weHaveSpace == 1) || (nameOfDir[index] == ' ' && weHaveSpace == 0) || (nameOfDir[index] == '\n' && (!strcmp(checkCommand, "cat") || !strcmp(checkCommand, "undo") || !strcmp(checkCommand, "auto") || !strcmp(checkCommand, "compare1") || !strcmp(checkCommand, "grepDir") || !strcmp(checkCommand, "find"))))
+        {
+            if(!strcmp(checkCommand, "find") && nameOfDir[index] == '\n') option = 0;
+            else if(!strcmp(checkCommand, "find") && armanFind && nameOfDir[index] == ' ') option = 1;
         nameOfDir[index] = '\0';
         FILE *check = fopen(nameOfDir, "r");
         if(check == NULL)
@@ -1521,6 +1617,7 @@ while(index != -1)
             fclose(check);
         if(strcmp(checkCommand, "insertstr") == 0)
         {
+        if(armanOffOrOn == 0){
         char secondCommand[100];
         scanf("%s", secondCommand);
         if(strcmp(secondCommand, "--str") == 0)
@@ -1529,13 +1626,19 @@ while(index != -1)
             setStringInSpecified(nameOfDir);
             backToMainFolder();
             return;
+        }}
+        else
+        {
+            setStringInSpecified(nameOfDir);
+            backToMainFolder();
         }
         }
         else if(strcmp(checkCommand, "cat") == 0)
         {
          catFile(nameOfDir);
-         printf("\n");
+         if(armanOffOrOn == 0) printf("\n");
          backToMainFolder();
+         if(armanOffOrOn) arman();
          return;
         }
         else if(strcmp(checkCommand, "removestr") == 0)
@@ -1599,17 +1702,20 @@ while(index != -1)
             fclose(file1);
             fclose(file2);
             backToMainFolder();
+            if(armanOffOrOn) arman();
             return;
         }
         else if(!strcmp(checkCommand, "find"))
         {
-            int cout = 0, at = 0, byword = 0, all = 0, option = 0, star = -1;
+            int cout = 0, at = 0, byword = 0, all = 0, star = -1;
             char command[10000];
+            char *inputedString = malloc(1000000 * sizeof(char));
+            if(armanFind == 0)
+            {
             scanf("%s",command);
             if(!strcmp(command, "--str"))
             {
             getchar();
-            char *inputedString = malloc(1000000 * sizeof(char));
             int index = 0, weHaveSpace = 0;
             while(1)
             {
@@ -1667,6 +1773,10 @@ while(index != -1)
             }
             index++;
             }
+            }
+            }
+            if(armanFind)
+              strcpy(inputedString, armanString);
             if(option == 0){cout = 0; at = 0; byword = 0; all = 0;}
             else
             {
@@ -1680,24 +1790,37 @@ while(index != -1)
                all = 1;
             else if(!strcmp(command, "-count"))
                cout = 1;
+            else if(!strcmp(command, "=D"))
+            {
+                armanOffOrOn = 1;
+                break;
+            }
             if(getchar() == '\n')
                break;
             }
             }
             int x;
-            if((at && all) || (at && cout) || (all && cout) || (cout && byword))
-                 printf("Invalid combination\n");
+            if((at && all) || (at && cout) || (all && cout) || (cout && byword)){
+                 if(armanOffOrOn == 0) printf("Invalid combination\n");
+                 else strcat(armanString,"Invalid combination\n" );
+                 }
             else if(all == 1 && byword == 1){
                makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
             else if(at && byword == 1){
-               makePervious(nameOfDir); printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
+               makePervious(nameOfDir);
+               if(armanOffOrOn == 0) printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
+               else sprintf(armanString, "%d", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
+               }
             else if(all == 0){
-               makePervious(nameOfDir); printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
+               makePervious(nameOfDir); 
+               if(armanOffOrOn == 0) printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
+               else sprintf(armanString, "%d", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
+               }
             else{
                makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
             isCommanValid = 1;
-            }
             backToMainFolder();
+            if(armanOffOrOn) arman();
             return;
         }
         else if(!strcmp(checkCommand, "replace"))
@@ -1744,12 +1867,36 @@ while(index != -1)
 }
 }
 
+void arman()
+{
+char command[100];
+   scanf("%s", command);
+if(!strcmp(command, "insertstr"))
+{
+    scanf("%s", command);
+    if(!strcmp(command, "--file"))
+       goToDir("insertstr");
+}
+else if(!strcmp(command, "find"))
+{
+    scanf("%s", command);
+    if(!strcmp(command, "--file"))
+    {
+       armanOffOrOn = 0;
+       armanFind = 1;
+       goToDir("find");
+    }
+}
+//baraye find bayad armano khomoosh koni
+}
+
 int main()
 {
 char commands[1000];
 while(1)
 {
-isCommanValid = 0;
+isCommanValid = 0;armanOffOrOn = 0;armanFind = 0;
+memset(armanString, 0, 10000);
 scanf("%s", commands);
 
     if(strcmp(commands, "createfile") == 0)
@@ -1855,8 +2002,19 @@ scanf("%s", commands);
            printf("Invalid depth\n");
         else if(depth > -1)
         {
-           printf("root:\n");
+           if(getchar() == ' ')
+           {
+            scanf("%s", commands);
+            if(!strcmp(commands, "=D"))
+                armanOffOrOn = 1;
+           }
+           if(armanOffOrOn) strcpy(armanString, "root:\n");
+           else
+              printf("root:\n");
            tree(depth, "./root", depth);
+           if(armanOffOrOn) {
+              arman();
+              }
         }
     }
     if(isCommanValid == 0)
