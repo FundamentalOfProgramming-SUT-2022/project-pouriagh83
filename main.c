@@ -781,10 +781,8 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                 }
             }
             if(check && weWannaIndex){
-                char b = getc(openToRead);
-                while(b != ' ' && b != EOF && b != '\n' && b != '\0'){b = getc(openToRead);index++;}
                 fclose(openToRead);
-                return index;
+                return output + strlen(string) - 1;
             }
             else if(check){
               fclose(openToRead);
@@ -818,7 +816,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
            return findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 1);
         int x = findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 0);
         FILE* openToRead = fopen(nameOfFile, "r");
-        for(int i = 0; i < x; i++)
+        for(int i = 0; i <= x; i++)
         {
             fseek(openToRead, x - i, SEEK_SET);
             char a = getc(openToRead);
@@ -827,9 +825,10 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
                fclose(openToRead);
                return x - i + 1;
             }
-            fclose(openToRead);
-            return 0;
         }
+        fclose(openToRead);
+        if(x == -1) return -1;
+        return 0;
     }
     else
     {
@@ -999,10 +998,13 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
 }
 else if(at == 0 && all == 0 && byword == 0 && count == 1)
 {
-int i = 0;
+int i;char string2[10000];
+strcpy(string2, string);
 for(i = 1;;i++)
 {
-    if(findFunction(nameOfFile, string, 0, i, 0, 0, starIndex, 0) == -1) break;
+    int x = findFunction(nameOfFile, string, 0, i, 0, 0, starIndex, 0);
+    strcpy(string, string2);
+    if(x == -1) break;
 }
 return i - 1;
 }
@@ -1108,18 +1110,19 @@ else if(at && all == 0 && byword == 1 && count == 0)
     return numberOfSpace + 1;
 }
 
-else if(at = 0 && all == 1 && byword == 1 && count == 0)
+else if(at == 0 && all == 1 && byword == 1 && count == 0)
 {
     for(int i = 1;; i++)
     {
-        if(i > 1)
-           printf(", ");
     int x = findFunction(nameOfFile, string, 0, i, 1, 0, starIndex, 0);
+    if(x == -1 && i == 1) {printf("-1\n");return -1;}
     if(x == -1)
     {
         printf("\n");
         return 0;
     }
+    if(i > 1)
+        printf(", ");
     printf("%d", x);
     }
 }
@@ -1683,11 +1686,11 @@ while(index != -1)
             }
             int x;
             if((at && all) || (at && cout) || (all && cout) || (cout && byword))
-                 printf("Invalid combination");
+                 printf("Invalid combination\n");
             else if(all == 1 && byword == 1){
                makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
             else if(at && byword == 1){
-               makePervious(nameOfDir); printf("%d", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
+               makePervious(nameOfDir); printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
             else if(all == 0){
                makePervious(nameOfDir); printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));}
             else{
