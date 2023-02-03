@@ -737,6 +737,7 @@ void compare(FILE* file1, FILE* file2)
                 strcat(armanString, line1);
                 strcat(armanString, "\n");
                 strcat(armanString, line2);
+                strcat(armanString, "\n");
             }
             break;
         }
@@ -757,7 +758,8 @@ void compare(FILE* file1, FILE* file2)
         char a = getc(file1);
         while(a != EOF)
         {
-        printf("%c", a);
+        if(armanOffOrOn == 0) printf("%c", a);
+        else strncat(armanString, &a, 1);
         a = getc(file1);
         }
         if(armanOffOrOn == 0) printf("\n");
@@ -820,7 +822,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
             }
             if(check && weWannaIndex){
                 fclose(openToRead);
-                return output + strlen(string) - 1;
+                return index;
             }
             else if(check){
               fclose(openToRead);
@@ -840,7 +842,19 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
     {
         string[strlen(string) - 1] = '\0';
         if(weWannaIndex)
-           return findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 1);
+        {
+        int x = findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 1);
+        FILE *openToFind = fopen(nameOfFile, "r");
+        fseek(openToFind, x, SEEK_SET);
+        char a = getc(openToFind);int here = 0;
+        while(a != ' ')
+        {
+            here++;
+            a = getc(openToFind);
+        }
+        fclose(openToFind);
+        return x + here - 1;
+        }
         return findFunction(nameOfFile, string, 0, 0, 0, 0, -1, 0);
     }
     else if(starIndex == 0)
@@ -1345,9 +1359,15 @@ void replaceString(char *nameOfFile)
                option = 1;
             break;
             }
+            else if(str2[index] == '\n')
+            {
+                str2[index] = '\0';
+                option = 0;
+                break;
+            }
             index++;
             }
-            int at = 1, all = 0;
+            int at = 0, all = 0;
             if(option)
             {
                 isCommanValid = 1;
@@ -1359,15 +1379,18 @@ void replaceString(char *nameOfFile)
                    all = 1;
                 if(getchar() == '\n') break;
                 }
-                if(at == 1 && all == 0) {printf("Invalid option\n"); return;}
-                if(!at && !all) {isCommanValid = 0; return;}
+                if(at && all) {printf("Invalid option\n"); return;}
             }
+            isCommanValid = 1;
             makePervious(nameOfFile);
             if(all == 0)
             {
+                if(at == 0) at = 1;
+                char hey[10000];
+                strcpy(hey, str1);
                 int startIndex = findFunction(nameOfFile, str1, 0, at, 0, 0, star, 0);
-                int endIndex = findFunction(nameOfFile, str1, 0, at, 0, 0, star, 1);
-                if(startIndex == -1) {printf("Invalid position");return;}
+                int endIndex = findFunction(nameOfFile, hey, 0, at, 0, 0, star, 1);
+                if(startIndex == -1) {printf("String not found!\n");return;}
                 FILE *openToRead = fopen(nameOfFile, "r");
                 FILE *temp = fopen("tmp.txt", "w");
                 for(int i = 0; i < startIndex; i++)
@@ -1400,8 +1423,10 @@ void replaceString(char *nameOfFile)
             {
              while(1)
              {
+                char hey[10000];
+                strcpy(hey, str1);
                int startIndex = findFunction(nameOfFile, str1, 0, 1, 0, 0, star, 0);
-               int endIndex = findFunction(nameOfFile, str1, 0, 1, 0, 0, star, 1);
+               int endIndex = findFunction(nameOfFile, hey, 0, 1, 0, 0, star, 1);
                if(startIndex == -1) return;
                 FILE *openToRead = fopen(nameOfFile, "r");
                 FILE *temp = fopen("tmp.txt", "w");
@@ -1618,7 +1643,7 @@ while(index != -1)
         if(check == NULL)
         {
         fclose(check);
-        printf("The file isn't exited!\n");
+        printf("The file doesn't exist!\n");
         while(getchar() != '\n');
         isCommanValid = 1;
         backToMainFolder();
@@ -1863,7 +1888,7 @@ while(index != -1)
     nameOfDir[index] = '\0';
     if(stat(nameOfDir, &st) == -1)
        {
-       printf("The directory isn't exited!\n");
+       printf("The directory doesn't exist!\n");
        while(getchar() != '\n');
        isCommanValid = 1;
        backToMainFolder();
@@ -1914,6 +1939,8 @@ else if(!strcmp(command, "grep"))
             armanGrep = 1;
             armanOffOrOn = 0;
             getchar();
+            memset(saveGrep, 0, 100000);
+            armanString[strlen(armanString) - 1] = '\0';
             goToDir("grepDir");
             printf("%s", saveGrep);
             if(grepOption == 1)
@@ -1931,7 +1958,6 @@ while(1)
 isCommanValid = 0;armanOffOrOn = 0;armanFind = 0, armanGrep = 0, armanForPrintGrep = 0;
 memset(armanString, 0, 10000);
 scanf("%s", commands);
-
     if(strcmp(commands, "createfile") == 0)
     {
         scanf("%s", commands);
