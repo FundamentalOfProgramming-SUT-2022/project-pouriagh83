@@ -1298,12 +1298,17 @@ closedir(dir);
 void replaceString(char *nameOfFile)
 {
    char command[1000];
-   scanf("%s", command);
+   if(armanOffOrOn == 0)
+      scanf("%s", command);
+    else
+       strcpy(command, "--str1");
    if(!strcmp(command, "--str1"))
    {
-            getchar();
             char *str1 = malloc(1000000 * sizeof(char));
             int index = 0, weHaveSpace = 0, star = -1;
+            if(armanOffOrOn == 0)
+            {
+            getchar();
             while(1)
             {
             scanf("%c", &str1[index]);
@@ -1351,6 +1356,8 @@ void replaceString(char *nameOfFile)
             }
             index++;
             }
+            }
+            else strcpy(str1, armanString);
     scanf("%s", command);
     if(!strcmp(command, "--str2"))
     {
@@ -1980,13 +1987,20 @@ else if(!strcmp(command, "grep"))
             armanOffOrOn = 0;
             getchar();
             memset(saveGrep, 0, 100000);
-            armanString[strlen(armanString) - 1] = '\0';
             goToDir("grepDir");
             printf("%s", saveGrep);
             if(grepOption == 1)
                printf("%d\n", lineNUmberGrep);
         }
         
+}
+else if(!strcmp(command, "replace"))
+{
+    scanf("%s", command);
+    if(!strcmp(command, "--file"))
+    {
+     goToDir("replace");
+    }
 }
 }
 
