@@ -1415,7 +1415,6 @@ void replaceString(char *nameOfFile)
             int at = 0, all = 0;
             if(option)
             {
-                isCommanValid = 1;
                 while(1){
                 scanf("%s", command);
                 if(!strcmp(command, "-at"))
@@ -1783,6 +1782,7 @@ while(index != -1)
             fclose(file1);
             fclose(file2);
             backToMainFolder();
+            isCommanValid = 1;
             if(armanOffOrOn) arman();
             return;
         }
