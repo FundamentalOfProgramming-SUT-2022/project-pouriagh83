@@ -29,10 +29,26 @@ numberOfDirectoryWeGoInto = 0;
 
 void makePervious(char *nameOfFile)
 {
-    char name[50];
-    strcpy(name, "pervious");
+    char name[10000];
+    for(int i = 0;;i++)
+    {
+    strcpy(name, "POF1");
+    for(int j = 0; j < i; j++){
+    strcat(name, "1");}
+    strcat(name, "pervious");
     strcat(name, nameOfFile);
-    remove(name);
+    FILE *check = fopen(name, "r");
+    if(check == NULL)
+    {
+        fclose(check);
+        break;
+    }
+    else
+    {
+        fclose(check);
+        memset(name, 0, 10000);
+    }
+    }
     FILE *perviousVersion = fopen(name, "w");
     FILE *now = fopen(nameOfFile, "r");
     char a = getc(now);
@@ -172,7 +188,7 @@ void setStringInSpecified(char *fileName)
     FILE *openForWrite = fopen(fileName, "r");
     FILE *tmpFile = fopen("tmp.txt", "w");
     int whichLine = 1, whichChar = 0;
-    char temp;
+    char temp = 'a';
     while(whichLine != lineNumber)
     {
         temp = getc(openForWrite);
@@ -244,11 +260,13 @@ FILE *tempFile = fopen("tmp.txt", "w");
 int whichLineWeStand = 1, whichCharWeStand = 0;
     if(backOrForward == 'b')
     {
-    char *saveChar = malloc(100000000 * sizeof(char));
+    int sizeMalloc = 10;
+    char *saveChar = malloc(sizeMalloc * sizeof(char));
     int countCharInFile = 0;
     int index = 0;
     while(whichLineWeStand != lineNumber)
     {
+        if(countCharInFile + 1 == sizeMalloc){sizeMalloc += 2; realloc(saveChar, sizeMalloc);}
         saveChar[index] = getc(openToRead);
         countCharInFile++;
         if(saveChar[index] == '\n')
@@ -257,6 +275,7 @@ int whichLineWeStand = 1, whichCharWeStand = 0;
     }
     while(charNumber != whichCharWeStand)
     {
+        if(countCharInFile + 1 == sizeMalloc){sizeMalloc += 2; realloc(saveChar, sizeMalloc);}
         saveChar[index] = getc(openToRead);
         countCharInFile++;
         whichCharWeStand++;
@@ -454,11 +473,13 @@ if(strcmp(command, "--pos") == 0)
         FILE *tempFile = fopen("tmp.txt", "w");
 if(backOrForward == 'b')
     {
-    char *saveChar = malloc(100000000 * sizeof(char));
+        int sizeMalloc = 10;
+    char *saveChar = malloc(sizeMalloc * sizeof(char));
     int countCharInFile = 0;
     int index = 0;
     while(whichLineWeStand != lineNumber)
     {
+        if(countCharInFile + 1 == sizeMalloc){sizeMalloc += 2; realloc(saveChar, sizeMalloc);}
         saveChar[index] = getc(openToRead);
         countCharInFile++;
         if(saveChar[index] == '\n')
@@ -467,6 +488,7 @@ if(backOrForward == 'b')
     }
     while(charNumber != whichCharWeStand)
     {
+        if(countCharInFile + 1 == sizeMalloc){sizeMalloc += 2; realloc(saveChar, sizeMalloc);}
         saveChar[index] = getc(openToRead);
         countCharInFile++;
         whichCharWeStand++;
@@ -584,9 +606,31 @@ void pasteStr(char *fileName)
 
 void undo(char *nameOfFile)
 {
-char namePervious[50];
-strcpy(namePervious, "pervious");
+char namePervious[10000];
+for(int i = 0;; i++)
+{
+strcpy(namePervious, "POF1");
+for(int j = 0; j < i; j++){strcat(namePervious, "1");}
+strcat(namePervious, "pervious");
 strcat(namePervious, nameOfFile);
+FILE *check = fopen(namePervious, "r");
+if(check == NULL)
+{
+    if(i == 0) return;
+ fclose(check);
+ memset(namePervious, 0, 10000);
+ strcpy(namePervious, "POF1");
+ for(int j = 1; j < i; j++){strcat(namePervious, "1");}
+ strcat(namePervious, "pervious");
+ strcat(namePervious, nameOfFile);
+ break;
+}
+else
+{
+fclose(check);
+memset(namePervious, 0, 10000);
+}
+}
 remove(nameOfFile);
 DWORD attributes = GetFileAttributes(namePervious);
 SetFileAttributes(namePervious, attributes + FILE_ATTRIBUTE_HIDDEN);
@@ -845,7 +889,7 @@ if(at == 0 && all == 0 && count == 0 && byword == 0)
         FILE *openToFind = fopen(nameOfFile, "r");
         fseek(openToFind, x, SEEK_SET);
         char a = getc(openToFind);int here = 0;
-        while(a != ' ')
+        while(a != ' ' && a != EOF && a != '\n' && a != '\0')
         {
             here++;
             a = getc(openToFind);
@@ -1151,7 +1195,10 @@ else if(at == 0 && all == 1 && byword == 0 && count == 0)
 
 else if(at && all == 0 && byword == 1 && count == 0)
 {
+    char string2[10000];
+    strcpy(string2, string);
     int x = findFunction(nameOfFile, string, 0, at, 0, 0, starIndex, 0);
+    strcpy(string, string2);
     if(x == -1)
       return x;
     FILE* openToRead = fopen(nameOfFile, "r");
@@ -1208,7 +1255,7 @@ if(dir == NULL)
    return;
 while((entry = readdir(dir)) != NULL)
 {
-     if(entry -> d_name[0] != '.' && (entry -> d_name[0] != 'p' || entry -> d_name[1] != 'e' || entry -> d_name[2] != 'r' || entry -> d_name[3] != 'v' || entry -> d_name[4] != 'i' || entry -> d_name[5] != 'o' || entry -> d_name[6] != 'u' || entry -> d_name[7] != 's'))
+     if(entry -> d_name[0] != '.' && (entry -> d_name[0] != 'P' || entry -> d_name[1] != 'O' || entry -> d_name[2] != 'F' || entry -> d_name[3] != '1'))
      {
         for(int i = 0; i < firstDepth - depth; i++)
         { 
