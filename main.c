@@ -654,8 +654,8 @@ void autoIndent(char *nameOfFile)
            for(int i = 0; i < 4 * numberOfBraces; i++){fputc(' ', temp);}
         if(prevent != ' ' && prevent != SEEK_SET && prevent != '\n')
            fputc(' ', temp);
-        if(prevent == '}')
-           fputc('\n', temp);
+        if(prevent == '}'){
+           fputc('\n', temp);for(int i = 0; i < 4 * numberOfBraces; i++){fputc(' ', temp);}}
         numberOfBraces++;
         fputc(a, temp);
         fputc('\n', temp);
@@ -2048,6 +2048,7 @@ scanf("%s", commands);
     }
     else if(!strcmp(commands, "auto-indent"))
     {
+        isCommanValid = 1;
         goToDir("auto");
     }
     else if(!strcmp(commands, "compare"))
