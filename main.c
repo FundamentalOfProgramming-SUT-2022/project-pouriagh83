@@ -208,7 +208,6 @@ void setStringInSpecified(char *fileName)
 }
 void catFile(char *nameOfFile)
 {
-    makePervious(nameOfFile);
     FILE *openToRead = fopen(nameOfFile, "r");
     char character;
     while(character != EOF)
@@ -327,7 +326,6 @@ if(strcmp(command, "--pos") == 0)
     scanf("%s", command);
     if(strcmp(command, "-size") == 0)
     {
-        makePervious(nameOfFile);
         int numberOfCharacterToCopy;
         scanf("%d", &numberOfCharacterToCopy);
         getchar();getchar();
@@ -1515,7 +1513,6 @@ char* grepString()
 char saveGrep[100000];
 void grep(char* nameOfFile)
 {
-    makePervious(nameOfFile);
     int previous = -1;
     isCommanValid = 1;
     if(armanGrep) strcpy(giveGrepString, armanString);
@@ -1841,20 +1838,16 @@ while(index != -1)
                  if(armanOffOrOn == 0) printf("Invalid combination\n");
                  else strcat(armanString,"Invalid combination\n" );
                  }
-            else if(all == 1 && byword == 1){
-               makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
+            else if(all == 1 && byword == 1){ x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
             else if(at && byword == 1){
-               makePervious(nameOfDir);
                if(armanOffOrOn == 0) printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
                else sprintf(armanString, "%d", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
                }
             else if(all == 0){
-               makePervious(nameOfDir); 
                if(armanOffOrOn == 0) printf("%d\n", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
                else sprintf(armanString, "%d", findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0));
                }
-            else{
-               makePervious(nameOfDir); x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
+            else{x = findFunction(nameOfDir, inputedString, cout, at, byword, all, star, 0);}
             isCommanValid = 1;
             backToMainFolder();
             if(armanOffOrOn) arman();
